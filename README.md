@@ -6,6 +6,6 @@ Kubernetes Operator for deploying Orca Agent (Kite etc.)
 
 # Build
 ```
-operator-sdk build tufin/orca-operator`
+operator-sdk build tufin/orca-operator
 docker push tufin/orca-operator
 ```
