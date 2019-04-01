@@ -1,0 +1,11 @@
+apiVersion: app.example.com/v1alpha1
+kind: Kite
+metadata:
+  name: example-kite
+spec:
+  # Add fields here
+  dns: true
+  conntrack: false
+  domain: generic-bank
+  project: retail
+  
