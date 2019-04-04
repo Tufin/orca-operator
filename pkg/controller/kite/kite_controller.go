@@ -2,9 +2,11 @@ package kite
 
 import (
 	"context"
+	"strings"
 
 	appv1alpha1 "github.com/tufin/orca-operator/pkg/apis/app/v1alpha1"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -101,31 +103,41 @@ func (r *ReconcileKite) Reconcile(request reconcile.Request) (reconcile.Result, 
 	}
 
 	// Define a new Pod object
-	pod := newPodForCR(instance)
+	//pod := newPodForCR(instance)
+	reqLogger.Info("TUFIN_GURU_URL",
+		"Domain", instance.Spec.Domain,
+		"Project", instance.Spec.Project,
+		"KiteImage", instance.Spec.KiteImage,
+		"EndPoints", instance.Spec.EndPoints,
+		"IngnoredConfigMaps", instance.Spec.IngnoredConfigMaps,
+		"Components", instance.Spec.Components,
+		"KubePlatform", instance.Spec.KubePlatform,
+	)
+	deployment := newDeploymentForCR(instance)
 
 	// Set Kite instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, pod, r.scheme); err != nil {
+	if err := controllerutil.SetControllerReference(instance, deployment, r.scheme); err != nil {
 		return reconcile.Result{}, err
 	}
 
-	// Check if this Pod already exists
-	found := &corev1.Pod{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: pod.Name, Namespace: pod.Namespace}, found)
+	// Check if this Deployment already exists
+	found := &appsv1.Deployment{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: deployment.Name, Namespace: deployment.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating a new Pod", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
-		err = r.client.Create(context.TODO(), pod)
+		reqLogger.Info("Creating a new deployment", "deployment.Namespace", deployment.Namespace, "deployment.Name", deployment.Name)
+		err = r.client.Create(context.TODO(), deployment)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
 
-		// Pod created successfully - don't requeue
+		// deployment created successfully - don't requeue
 		return reconcile.Result{}, nil
 	} else if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	// Pod already exists - don't requeue
-	reqLogger.Info("Skip reconcile: Pod already exists", "Pod.Namespace", found.Namespace, "Pod.Name", found.Name)
+	// deployment already exists - don't requeue
+	reqLogger.Info("Skip reconcile: deployment already exists", "deployment.Namespace", found.Namespace, "deployment.Name", found.Name)
 	return reconcile.Result{}, nil
 }
 
@@ -143,11 +155,144 @@ func newPodForCR(cr *appv1alpha1.Kite) *corev1.Pod {
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
 				{
-					Name:    "busybox",
-					Image:   "busybox",
-					Command: []string{"sleep", "3600"},
+					Name:  "kite",
+					Image: cr.Spec.KiteImage,
 				},
 			},
+		},
+	}
+}
+
+// newPodForCR returns the kite deployment with the same name/namespace as the cr
+func newDeploymentForCR(cr *appv1alpha1.Kite) *appsv1.Deployment {
+	labels := map[string]string{
+		"app": cr.Name,
+	}
+
+	var replicas int32 = 1
+	var selector = metav1.LabelSelector{
+		MatchLabels: labels,
+	}
+
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      cr.Name,
+			Namespace: cr.Namespace,
+			Labels:    labels,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: &replicas,
+			Selector: &selector,
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      cr.Name,
+					Namespace: cr.Namespace,
+					Labels:    labels,
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  "kite",
+							Image: cr.Spec.KiteImage,
+							Env: []corev1.EnvVar{
+								{
+									Name:  "DOMAIN",
+									Value: cr.Spec.Domain,
+								},
+								{
+									Name:  "PROJECT",
+									Value: cr.Spec.Project,
+								},
+								{
+									Name:  "IGNORED_CONFIGMAPS",
+									Value: strings.Join(cr.Spec.IngnoredConfigMaps, ","),
+								},
+								// URL
+								{
+									Name:  "TUFIN_ORCA_URL",
+									Value: cr.Spec.EndPoints["orca"],
+								},
+								{
+									Name:  "TUFIN_GURU_URL",
+									Value: cr.Spec.EndPoints["guru"],
+								},
+								{
+									Name:  "TUFIN_DOCKER_REPO_URL",
+									Value: cr.Spec.EndPoints["registry"],
+								},
+								// components
+								{
+									Name:  "TUFIN_INSTALL_DNS",
+									Value: bts(cr.Spec.Components["dns"]),
+								},
+								{
+									Name:  "TUFIN_INSTALL_CONNTRACK",
+									Value: bts(cr.Spec.Components["conntrack"]),
+								},
+								{
+									Name:  "TUFIN_INSTALL_SYSLOG",
+									Value: bts(cr.Spec.Components["syslog"]),
+								},
+								{
+									Name:  "TUFIN_INSTALL_ISTIO",
+									Value: bts(cr.Spec.Components["istio"]),
+								},
+								{
+									Name:  "TUFIN_INSTALL_DOCKER_PUSHER",
+									Value: bts(cr.Spec.Components["docker_pusher"]),
+								},
+								{
+									Name:  "TUFIN_INSTALL_KUBE_EVENTS_WATCHER",
+									Value: bts(cr.Spec.Components["kube_events_watcher"]),
+								},
+								{
+									Name:  "TUFIN_INSTALL_KUBE_EVENTS_WATCHER_NETWORK_POLICY",
+									Value: bts(cr.Spec.Components["kube_events_watcher_network_policy"]),
+								},
+								// secrets
+								{
+									Name:      "CRT",
+									ValueFrom: getSecretValue("tufin-kite-secrets", "guru-crt"),
+								},
+								{
+									Name:      "TUFIN_DOCKER_REPO_USERNAME",
+									ValueFrom: getSecretValue("tufin-kite-secrets", "docker-repo-username"),
+								},
+								{
+									Name:      "TUFIN_DOCKER_REPO_PASSWORD",
+									ValueFrom: getSecretValue("tufin-kite-secrets", "guru-api-key"),
+								},
+								{
+									Name:      "API_KEY",
+									ValueFrom: getSecretValue("tufin-kite-secrets", "guru-api-key"),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func bts(b bool) string {
+	if b {
+		return "TRUE"
+	} else {
+		return "FALSE"
+	}
+}
+
+func getSecretValue(name string, key string) *corev1.EnvVarSource {
+	var optional = true
+
+	return &corev1.EnvVarSource{
+		SecretKeyRef: &corev1.SecretKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: name,
+			},
+			Key:      key,
+			Optional: &optional,
 		},
 	}
 }
