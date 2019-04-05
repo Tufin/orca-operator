@@ -2,14 +2,12 @@ package kite
 
 import (
 	"context"
-	"strings"
 
 	appv1alpha1 "github.com/tufin/orca-operator/pkg/apis/app/v1alpha1"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -79,8 +77,6 @@ type ReconcileKite struct {
 
 // Reconcile reads that state of the cluster for a Kite object and makes changes based on the state read
 // and what is in the Kite.Spec
-// TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
-// a Pod as an example
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
@@ -103,7 +99,6 @@ func (r *ReconcileKite) Reconcile(request reconcile.Request) (reconcile.Result, 
 	}
 
 	// Define a new Pod object
-	//pod := newPodForCR(instance)
 	reqLogger.Info("TUFIN_GURU_URL",
 		"Domain", instance.Spec.Domain,
 		"Project", instance.Spec.Project,
@@ -113,16 +108,30 @@ func (r *ReconcileKite) Reconcile(request reconcile.Request) (reconcile.Result, 
 		"Components", instance.Spec.Components,
 		"KubePlatform", instance.Spec.KubePlatform,
 	)
-	deployment := newDeploymentForCR(instance)
+	deployment := getKiteDeployment(instance)
+	daemonset := getConntrackDaemonset(instance)
+
+	reconcileResult, err := r.createKiteDeployment(instance, deployment, request)
+	if err != nil {
+		return reconcileResult, err
+	}
+	reconcileResult, err = r.createConntrackDaemonset(instance, daemonset, request)
+	return reconcileResult, err
+}
+
+func (r *ReconcileKite) createKiteDeployment(instance *appv1alpha1.Kite, deployment *appsv1.Deployment, request reconcile.Request) (reconcile.Result, error) {
+
+	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
+	reqLogger.Info("Deploying Kite")
 
 	// Set Kite instance as the owner and controller
 	if err := controllerutil.SetControllerReference(instance, deployment, r.scheme); err != nil {
 		return reconcile.Result{}, err
 	}
 
-	// Check if this Deployment already exists
+	// Check if the Deployment already exists
 	found := &appsv1.Deployment{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: deployment.Name, Namespace: deployment.Namespace}, found)
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: deployment.Name, Namespace: deployment.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		reqLogger.Info("Creating a new deployment", "deployment.Namespace", deployment.Namespace, "deployment.Name", deployment.Name)
 		err = r.client.Create(context.TODO(), deployment)
@@ -139,160 +148,37 @@ func (r *ReconcileKite) Reconcile(request reconcile.Request) (reconcile.Result, 
 	// deployment already exists - don't requeue
 	reqLogger.Info("Skip reconcile: deployment already exists", "deployment.Namespace", found.Namespace, "deployment.Name", found.Name)
 	return reconcile.Result{}, nil
+
 }
 
-// newPodForCR returns a busybox pod with the same name/namespace as the cr
-func newPodForCR(cr *appv1alpha1.Kite) *corev1.Pod {
-	labels := map[string]string{
-		"app": cr.Name,
-	}
-	return &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-pod",
-			Namespace: cr.Namespace,
-			Labels:    labels,
-		},
-		Spec: corev1.PodSpec{
-			Containers: []corev1.Container{
-				{
-					Name:  "kite",
-					Image: cr.Spec.KiteImage,
-				},
-			},
-		},
-	}
-}
+func (r *ReconcileKite) createConntrackDaemonset(instance *appv1alpha1.Kite, daemonset *appsv1.DaemonSet, request reconcile.Request) (reconcile.Result, error) {
 
-// newPodForCR returns the kite deployment with the same name/namespace as the cr
-func newDeploymentForCR(cr *appv1alpha1.Kite) *appsv1.Deployment {
-	labels := map[string]string{
-		"app": cr.Name,
+	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
+	reqLogger.Info("Deploying Conntrack")
+
+	// Set Kite instance as the owner and controller
+	if err := controllerutil.SetControllerReference(instance, daemonset, r.scheme); err != nil {
+		return reconcile.Result{}, err
 	}
 
-	var replicas int32 = 1
-	var selector = metav1.LabelSelector{
-		MatchLabels: labels,
+	// Check if the Daemonset already exists
+	found := &appsv1.DaemonSet{}
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: daemonset.Name, Namespace: daemonset.Namespace}, found)
+	if err != nil && errors.IsNotFound(err) {
+		reqLogger.Info("Creating a new daemonset", "daemonset.Namespace", daemonset.Namespace, "daemonset.Name", daemonset.Name)
+		err = r.client.Create(context.TODO(), daemonset)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		// daemonset created successfully - don't requeue
+		return reconcile.Result{}, nil
+	} else if err != nil {
+		return reconcile.Result{}, err
 	}
 
-	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name,
-			Namespace: cr.Namespace,
-			Labels:    labels,
-		},
-		Spec: appsv1.DeploymentSpec{
-			Replicas: &replicas,
-			Selector: &selector,
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      cr.Name,
-					Namespace: cr.Namespace,
-					Labels:    labels,
-				},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						{
-							Name:  "kite",
-							Image: cr.Spec.KiteImage,
-							Env: []corev1.EnvVar{
-								{
-									Name:  "DOMAIN",
-									Value: cr.Spec.Domain,
-								},
-								{
-									Name:  "PROJECT",
-									Value: cr.Spec.Project,
-								},
-								{
-									Name:  "IGNORED_CONFIGMAPS",
-									Value: strings.Join(cr.Spec.IngnoredConfigMaps, ","),
-								},
-								// URL
-								{
-									Name:  "TUFIN_ORCA_URL",
-									Value: cr.Spec.EndPoints["orca"],
-								},
-								{
-									Name:  "TUFIN_GURU_URL",
-									Value: cr.Spec.EndPoints["guru"],
-								},
-								{
-									Name:  "TUFIN_DOCKER_REPO_URL",
-									Value: cr.Spec.EndPoints["registry"],
-								},
-								// components
-								{
-									Name:  "TUFIN_INSTALL_DNS",
-									Value: bts(cr.Spec.Components["dns"]),
-								},
-								{
-									Name:  "TUFIN_INSTALL_CONNTRACK",
-									Value: bts(cr.Spec.Components["conntrack"]),
-								},
-								{
-									Name:  "TUFIN_INSTALL_SYSLOG",
-									Value: bts(cr.Spec.Components["syslog"]),
-								},
-								{
-									Name:  "TUFIN_INSTALL_ISTIO",
-									Value: bts(cr.Spec.Components["istio"]),
-								},
-								{
-									Name:  "TUFIN_INSTALL_DOCKER_PUSHER",
-									Value: bts(cr.Spec.Components["docker_pusher"]),
-								},
-								{
-									Name:  "TUFIN_INSTALL_KUBE_EVENTS_WATCHER",
-									Value: bts(cr.Spec.Components["kube_events_watcher"]),
-								},
-								{
-									Name:  "TUFIN_INSTALL_KUBE_EVENTS_WATCHER_NETWORK_POLICY",
-									Value: bts(cr.Spec.Components["kube_events_watcher_network_policy"]),
-								},
-								// secrets
-								{
-									Name:      "CRT",
-									ValueFrom: getSecretValue("tufin-kite-secrets", "guru-crt"),
-								},
-								{
-									Name:      "TUFIN_DOCKER_REPO_USERNAME",
-									ValueFrom: getSecretValue("tufin-kite-secrets", "docker-repo-username"),
-								},
-								{
-									Name:      "TUFIN_DOCKER_REPO_PASSWORD",
-									ValueFrom: getSecretValue("tufin-kite-secrets", "guru-api-key"),
-								},
-								{
-									Name:      "API_KEY",
-									ValueFrom: getSecretValue("tufin-kite-secrets", "guru-api-key"),
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-}
+	// daemonset already exists - don't requeue
+	reqLogger.Info("Skip reconcile: daemonset already exists", "daemonset.Namespace", found.Namespace, "deployment.Name", found.Name)
+	return reconcile.Result{}, nil
 
-func bts(b bool) string {
-	if b {
-		return "TRUE"
-	} else {
-		return "FALSE"
-	}
-}
-
-func getSecretValue(name string, key string) *corev1.EnvVarSource {
-	var optional = true
-
-	return &corev1.EnvVarSource{
-		SecretKeyRef: &corev1.SecretKeySelector{
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: name,
-			},
-			Key:      key,
-			Optional: &optional,
-		},
-	}
 }
