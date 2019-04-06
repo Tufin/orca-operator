@@ -15,10 +15,10 @@ type KiteSpec struct {
 	// Add custom validation using kubebuilder tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html
 	Domain             string            `json:"domain,omitempty"`
 	Project            string            `json:"project,omitempty"`
-	KiteImage          string            `json:"kite_image,omitempty"`
 	IngnoredConfigMaps []string          `json:"ignored_config_maps,omitempty"`
 	Components         map[string]bool   `json:"components,omitempty"`
 	EndPoints          map[string]string `json:"endpoints,omitempty"`
+	Images             map[string]string `json:"images,omitempty"`
 	KubePlatform       string            `json:"kube_platform,omitempty"`
 }
 

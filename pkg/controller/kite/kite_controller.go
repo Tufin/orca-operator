@@ -98,16 +98,8 @@ func (r *ReconcileKite) Reconcile(request reconcile.Request) (reconcile.Result, 
 		return reconcile.Result{}, err
 	}
 
-	// Define a new Pod object
-	reqLogger.Info("TUFIN_GURU_URL",
-		"Domain", instance.Spec.Domain,
-		"Project", instance.Spec.Project,
-		"KiteImage", instance.Spec.KiteImage,
-		"EndPoints", instance.Spec.EndPoints,
-		"IngnoredConfigMaps", instance.Spec.IngnoredConfigMaps,
-		"Components", instance.Spec.Components,
-		"KubePlatform", instance.Spec.KubePlatform,
-	)
+	reqLogger.Info("Configuration", "Spec", instance.Spec)
+
 	deployment := getKiteDeployment(instance)
 	daemonset := getConntrackDaemonset(instance)
 

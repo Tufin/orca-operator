@@ -107,6 +107,13 @@ func (in *KiteSpec) DeepCopyInto(out *KiteSpec) {
 			(*out)[key] = val
 		}
 	}
+	if in.Images != nil {
+		in, out := &in.Images, &out.Images
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 

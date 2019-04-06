@@ -6,7 +6,9 @@ spec:
   # Add fields here
   domain: generic-bank
   project: istioless
-  kite_image: "tufin/kite:production"
+  images:
+    kite: "tufin/kite:production"
+    conntrack: "docker.io/weaveworks/scope:1.10.1"
   ignored_config_maps:
     - kube-system/ingress-gce-lock
     - istio-system/istio-ingress-controller-leader-istio

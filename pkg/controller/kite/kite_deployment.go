@@ -16,6 +16,7 @@ func getKiteDeployment(cr *appv1alpha1.Kite) *appsv1.Deployment {
 	}
 
 	var replicas int32 = 1
+
 	var selector = metav1.LabelSelector{
 		MatchLabels: labels,
 	}
@@ -39,7 +40,7 @@ func getKiteDeployment(cr *appv1alpha1.Kite) *appsv1.Deployment {
 					Containers: []corev1.Container{
 						{
 							Name:  "kite",
-							Image: cr.Spec.KiteImage,
+							Image: cr.Spec.Images["kite"],
 							Env: []corev1.EnvVar{
 								{
 									Name:  "DOMAIN",
