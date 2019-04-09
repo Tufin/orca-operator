@@ -1,0 +1,27 @@
+apiVersion: tufin.io/v1alpha1
+kind: Orca
+metadata:
+  name: orca
+  namespace: tufin-system
+spec:
+  domain: generic-bank
+  project: istioless
+  images:
+    kite: "tufin/kite:production"
+    conntrack: "docker.io/weaveworks/scope:1.10.1"
+  ignored_config_maps:
+    - kube-system/ingress-gce-lock
+    - istio-system/istio-ingress-controller-leader-istio
+  endpoints:
+    orca: "https://lightorca.tufin.io"
+    guru: "lightguru.tufin.io:443"
+    registry: lightregistry.tufin.io
+  components:
+    dns: true
+    conntrack: false
+    istio: false
+    pusher: true
+    syslog: false
+    watcher: true
+    kube-network-policy: true
+  kube_platform: Unknown
