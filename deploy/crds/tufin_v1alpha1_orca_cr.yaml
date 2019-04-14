@@ -17,8 +17,8 @@ spec:
     guru: "lightguru.tufin.io:443"
     registry: lightregistry.tufin.io
   components:
-    dns: true
-    conntrack: false
+    dns: false
+    conntrack: true
     istio: false
     pusher: true
     syslog: false
