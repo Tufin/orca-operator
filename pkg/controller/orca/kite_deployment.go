@@ -10,27 +10,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const (
-	kite                   = "kite"
-	kiteServiceAccount     = "orca-operator"
-	dockerSocketVolumeName = "docker-socket"
-	dockerSocketVolumePath = "/var/run/docker.sock"
-)
-
-var (
-	dockerSocketVolumeType = corev1.HostPathSocket
-)
-
 func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
-	labels := map[string]string{
-		"app": cr.Name,
-	}
 
 	var replicas int32 = 1
-
-	var selector = metav1.LabelSelector{
-		MatchLabels: labels,
-	}
+	labels := GetLabels(app + "=" + kite)
 
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -40,27 +23,23 @@ func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &replicas,
-			Selector: &selector,
+			Selector: GetLabelSelector(labels),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      cr.Name,
+					Name:      kite,
 					Namespace: cr.Namespace,
 					Labels:    labels,
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName: kiteServiceAccount,
+					ServiceAccountName: kite,
 					Volumes: []corev1.Volume{
-						{
-							Name: dockerSocketVolumeName,
-							VolumeSource: corev1.VolumeSource{
-								HostPath: &corev1.HostPathVolumeSource{Path: dockerSocketVolumePath, Type: &dockerSocketVolumeType},
-							},
-						},
+						GetHostVolume(dockerSocketVolumeName, dockerSocketVolumePath, corev1.HostPathSocket),
 					},
 					Containers: []corev1.Container{
 						{
-							Name:  kite,
-							Image: cr.Spec.Images[kite],
+							Name:            kite,
+							Image:           cr.Spec.Images[kite],
+							ImagePullPolicy: corev1.PullAlways,
 							VolumeMounts: []corev1.VolumeMount{
 								{Name: dockerSocketVolumeName, MountPath: dockerSocketVolumePath},
 							},
@@ -96,31 +75,31 @@ func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
 								// components
 								{
 									Name:  "TUFIN_INSTALL_DNS",
-									Value: bts(cr.Spec.Components["dns"]),
+									Value: BoolToString(cr.Spec.Components["dns"]),
 								},
 								{
 									Name:  "TUFIN_INSTALL_CONNTRACK",
-									Value: bts(cr.Spec.Components["conntrack"]),
+									Value: BoolToString(cr.Spec.Components["conntrack"]),
 								},
 								{
 									Name:  "TUFIN_INSTALL_SYSLOG",
-									Value: bts(cr.Spec.Components["syslog"]),
+									Value: BoolToString(cr.Spec.Components["syslog"]),
 								},
 								{
 									Name:  "TUFIN_INSTALL_ISTIO",
-									Value: bts(cr.Spec.Components["istio"]),
+									Value: BoolToString(cr.Spec.Components["istio"]),
 								},
 								{
 									Name:  "TUFIN_INSTALL_DOCKER_PUSHER",
-									Value: bts(cr.Spec.Components["docker_pusher"]),
+									Value: BoolToString(cr.Spec.Components["pusher"]),
 								},
 								{
 									Name:  "TUFIN_INSTALL_KUBE_EVENTS_WATCHER",
-									Value: bts(cr.Spec.Components["kube_events_watcher"]),
+									Value: BoolToString(cr.Spec.Components["watcher"]),
 								},
 								{
 									Name:  "TUFIN_INSTALL_KUBE_EVENTS_WATCHER_NETWORK_POLICY",
-									Value: bts(cr.Spec.Components["kube_events_watcher_network_policy"]),
+									Value: BoolToString(cr.Spec.Components["kube-network-policy"]),
 								},
 								// secrets
 								{
@@ -146,13 +125,6 @@ func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
 			},
 		},
 	}
-}
-
-func bts(b bool) string {
-	if b {
-		return "TRUE"
-	}
-	return "FALSE"
 }
 
 func getSecretValue(name string, key string) *corev1.EnvVarSource {

@@ -9,25 +9,17 @@ import (
 )
 
 func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
-	labels := map[string]string{
-		"app": "conntrack",
-	}
 
-	var selector = metav1.LabelSelector{
-		MatchLabels: labels,
-	}
-
-	const name = "conntrack"
-	const image = "docker.io/weaveworks/scope:1.10.1"
+	labels := GetLabels(app + "=" + conntrack)
 
 	return &appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
+			Name:      conntrack,
 			Namespace: cr.Namespace,
 			Labels:    labels,
 		},
 		Spec: appsv1.DaemonSetSpec{
-			Selector:        &selector,
+			Selector:        GetLabelSelector(labels),
 			MinReadySeconds: 5,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
@@ -36,22 +28,39 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 					Labels:    labels,
 				},
 				Spec: corev1.PodSpec{
+					ServiceAccountName: conntrack,
+					DNSPolicy:          corev1.DNSClusterFirstWithHostNet,
+					HostNetwork:        true,
+					HostPID:            true,
+					Tolerations: []corev1.Toleration{
+						{Effect: corev1.TaintEffectNoSchedule, Operator: corev1.TolerationOpExists},
+					},
+					Volumes: []corev1.Volume{
+						GetHostVolume(dockerSocketVolumeName, dockerSocketVolumePath, corev1.HostPathSocket),
+						GetHostVolume(scopePluginsVolumeName, scopePluginsVolumePath, corev1.HostPathDirectory),
+						GetHostVolume(scopeKernelDebugVolumeName, scopeKernelDebugVolumePath, corev1.HostPathDirectory),
+					},
 					Containers: []corev1.Container{
 						{
-							Name:  name,
-							Image: cr.Spec.Images["conntrack"],
+							Name:  conntrack,
+							Image: cr.Spec.Images[conntrack],
+							VolumeMounts: []corev1.VolumeMount{
+								{Name: dockerSocketVolumeName, MountPath: dockerSocketVolumePath},
+								{Name: scopePluginsVolumeName, MountPath: scopePluginsVolumePath},
+								{Name: scopeKernelDebugVolumeName, MountPath: scopeKernelDebugVolumePath},
+							},
 							Args: []string{
-								"'--mode=probe'",
-								"'--probe-only'",
-								"'--probe.kubernetes=true'",
-								"'--probe.docker.bridge=docker0'",
-								"'--probe.docker=true'",
-								"'kite." + cr.Namespace + ":80'",
+								"--mode=probe",
+								"--probe-only",
+								"--probe.kubernetes=true",
+								"--probe.docker.bridge=docker0",
+								"--probe.docker=true",
+								"kite." + cr.Namespace + ":80",
 							},
 							Command: []string{"/home/weave/scope"},
-							SecurityContext: &corev1.SecurityContext{
-								Privileged: getBoolValue(true),
-							},
+							//SecurityContext: &corev1.SecurityContext{
+							//	Privileged: GetBoolRef(true),
+							//},
 							Env: []corev1.EnvVar{
 								{
 									Name: "KUBERNETES_NODENAME",
@@ -69,11 +78,4 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 			},
 		},
 	}
-}
-
-func getBoolValue(val bool) *bool {
-
-	//ret := val
-
-	return &val
 }

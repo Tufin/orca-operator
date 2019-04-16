@@ -9,13 +9,12 @@ import (
 )
 
 func getKiteService(cr *appv1alpha1.Orca) *corev1.Service {
-	labels := map[string]string{
-		"app": cr.Name,
-	}
+
+	labels := GetLabels(name + "=" + kite)
 
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "kite",
+			Name:      kite,
 			Namespace: cr.Namespace,
 			Labels:    labels,
 		},
