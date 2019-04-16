@@ -102,12 +102,19 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 	}
 
 	deployment := getKiteDeployment(instance)
+	service := getKiteService(instance)
 	daemonset := getConntrackDaemonset(instance)
 
 	reconcileResult, err := r.createKiteDeployment(instance, deployment, request)
 	if err != nil {
 		return reconcileResult, err
 	}
+
+	reconcileResult, err = r.createKiteService(instance, service, request)
+	if err != nil {
+		return reconcileResult, err
+	}
+
 	reconcileResult, err = r.createConntrackDaemonset(instance, daemonset, request)
 	return reconcileResult, err
 }
@@ -140,6 +147,38 @@ func (r *ReconcileOrca) createKiteDeployment(instance *appv1alpha1.Orca, deploym
 
 	// deployment already exists - don't requeue
 	reqLogger.Info("Skip reconcile: deployment already exists", "deployment.Namespace", found.Namespace, "deployment.Name", found.Name)
+	return reconcile.Result{}, nil
+
+}
+
+func (r *ReconcileOrca) createKiteService(instance *appv1alpha1.Orca, service *corev1.Service, request reconcile.Request) (reconcile.Result, error) {
+
+	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
+	reqLogger.Info("Deploying Kite Service")
+
+	// Set Kite instance as the owner and controller
+	if err := controllerutil.SetControllerReference(instance, service, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	// Check if the Deployment already exists
+	found := &corev1.Service{}
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: service.Name, Namespace: service.Namespace}, found)
+	if err != nil && errors.IsNotFound(err) {
+		reqLogger.Info("Creating a new deployment", "service.Namespace", service.Namespace, "service.Name", service.Name)
+		err = r.client.Create(context.TODO(), service)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		// deployment created successfully - don't requeue
+		return reconcile.Result{}, nil
+	} else if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	// deployment already exists - don't requeue
+	reqLogger.Info("Skip reconcile: service already exists", "service.Namespace", found.Namespace, "service.Name", found.Name)
 	return reconcile.Result{}, nil
 
 }

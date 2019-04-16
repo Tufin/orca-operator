@@ -48,10 +48,19 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 								"'--probe.docker=true'",
 								"'kite." + cr.Namespace + ":80'",
 							},
+							Command: []string{"/home/weave/scope"},
+							SecurityContext: &corev1.SecurityContext{
+								Privileged: getBoolValue(true),
+							},
 							Env: []corev1.EnvVar{
 								{
-									Name:  "DOMAIN",
-									Value: cr.Spec.Domain,
+									Name: "KUBERNETES_NODENAME",
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											APIVersion: "v1",
+											FieldPath:  "spec.nodeName",
+										},
+									},
 								},
 							},
 						},
@@ -60,4 +69,11 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 			},
 		},
 	}
+}
+
+func getBoolValue(val bool) *bool {
+
+	//ret := val
+
+	return &val
 }

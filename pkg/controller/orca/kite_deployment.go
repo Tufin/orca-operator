@@ -11,7 +11,14 @@ import (
 )
 
 const (
-	kiteDeployment = "kite"
+	kite                   = "kite"
+	kiteServiceAccount     = "orca-operator"
+	dockerSocketVolumeName = "docker-socket"
+	dockerSocketVolumePath = "/var/run/docker.sock"
+)
+
+var (
+	dockerSocketVolumeType = corev1.HostPathSocket
 )
 
 func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
@@ -27,7 +34,7 @@ func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
 
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      kiteDeployment,
+			Name:      kite,
 			Namespace: cr.Namespace,
 			Labels:    labels,
 		},
@@ -41,10 +48,25 @@ func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
 					Labels:    labels,
 				},
 				Spec: corev1.PodSpec{
+					ServiceAccountName: kiteServiceAccount,
+					Volumes: []corev1.Volume{
+						{
+							Name: dockerSocketVolumeName,
+							VolumeSource: corev1.VolumeSource{
+								HostPath: &corev1.HostPathVolumeSource{Path: dockerSocketVolumePath, Type: &dockerSocketVolumeType},
+							},
+						},
+					},
 					Containers: []corev1.Container{
 						{
-							Name:  "kite",
-							Image: cr.Spec.Images["kite"],
+							Name:  kite,
+							Image: cr.Spec.Images[kite],
+							VolumeMounts: []corev1.VolumeMount{
+								{Name: dockerSocketVolumeName, MountPath: dockerSocketVolumePath},
+							},
+							Ports: []corev1.ContainerPort{
+								{ContainerPort: 6060}, {ContainerPort: 6061}, {ContainerPort: 6062, Protocol: corev1.ProtocolUDP},
+							},
 							Env: []corev1.EnvVar{
 								{
 									Name:  "DOMAIN",
