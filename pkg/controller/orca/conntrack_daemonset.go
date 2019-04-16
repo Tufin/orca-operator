@@ -37,8 +37,8 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 					},
 					Volumes: []corev1.Volume{
 						GetHostVolume(dockerSocketVolumeName, dockerSocketVolumePath, corev1.HostPathSocket),
-						GetHostVolume(scopePluginsVolumeName, scopePluginsVolumePath, corev1.HostPathDirectory),
-						GetHostVolume(scopeKernelDebugVolumeName, scopeKernelDebugVolumePath, corev1.HostPathDirectory),
+						//GetHostVolume(scopePluginsVolumeName, scopePluginsVolumePath, corev1.HostPathDirectory),
+						//GetHostVolume(scopeKernelDebugVolumeName, scopeKernelDebugVolumePath, corev1.HostPathDirectory),
 					},
 					Containers: []corev1.Container{
 						{
@@ -46,8 +46,8 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 							Image: cr.Spec.Images[conntrack],
 							VolumeMounts: []corev1.VolumeMount{
 								{Name: dockerSocketVolumeName, MountPath: dockerSocketVolumePath},
-								{Name: scopePluginsVolumeName, MountPath: scopePluginsVolumePath},
-								{Name: scopeKernelDebugVolumeName, MountPath: scopeKernelDebugVolumePath},
+								//{Name: scopePluginsVolumeName, MountPath: scopePluginsVolumePath},
+								//{Name: scopeKernelDebugVolumeName, MountPath: scopeKernelDebugVolumePath},
 							},
 							Args: []string{
 								"--mode=probe",
@@ -58,9 +58,9 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 								"kite." + cr.Namespace + ":80",
 							},
 							Command: []string{"/home/weave/scope"},
-							//SecurityContext: &corev1.SecurityContext{
-							//	Privileged: GetBoolRef(true),
-							//},
+							SecurityContext: &corev1.SecurityContext{
+								Privileged: GetBoolRef(true),
+							},
 							Env: []corev1.EnvVar{
 								{
 									Name: "KUBERNETES_NODENAME",

@@ -119,7 +119,10 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch}, []string{""}, []string{ResourceEndpoints, ResourceNamespaces, ResourceNodes, ResourcePods, ResourceServices, ResourceSecrets}),
 	)
 
+	conntrackCR := GetClusterRole(conntrack, GetLabels(name+"="+conntrack), GetPolicyRule([]string{VerbAll}, []string{VerbAll}, []string{VerbAll}))
+
 	kiteCRB := GetClusterRoleBindig(kite, kiteSA, kiteCR)
+	conntrackCRB := GetClusterRoleBindig(conntrack, conntrackSA, conntrackCR)
 
 	deployment := getKiteDeployment(instance)
 	service := getKiteService(instance)
@@ -145,7 +148,17 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 		return reconcileResult, err
 	}
 
+	reconcileResult, err = r.createClusterRole(instance, conntrackCR, request)
+	if err != nil {
+		return reconcileResult, err
+	}
+
 	reconcileResult, err = r.createClusterRoleBinding(instance, kiteCRB, request)
+	if err != nil {
+		return reconcileResult, err
+	}
+
+	reconcileResult, err = r.createClusterRoleBinding(instance, conntrackCRB, request)
 	if err != nil {
 		return reconcileResult, err
 	}
