@@ -22,11 +22,12 @@ const (
 	scopeKernelDebugVolumePath = "/sys/kernel/debug"
 
 	VerbAll    = "*"
-	VerbCreate = "view"
-	VerbUpdate = "update"
-	VerbList   = "list"
+	VerbGet    = "get"
 	VerbWatch  = "watch"
-	VerbGet    = "view"
+	VerbList   = "list"
+	VerbCreate = "create"
+	VerbUpdate = "update"
+	VerbDelete = "delete"
 
 	ResourceNodes                  = "nodes"
 	ResourceIngresses              = "ingresses"

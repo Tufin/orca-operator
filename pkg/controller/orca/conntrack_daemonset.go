@@ -21,6 +21,9 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 		Spec: appsv1.DaemonSetSpec{
 			Selector:        GetLabelSelector(labels),
 			MinReadySeconds: 5,
+			UpdateStrategy: appsv1.DaemonSetUpdateStrategy{
+				Type: "RollingUpdate",
+			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      cr.Name,
@@ -38,7 +41,7 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 					Volumes: []corev1.Volume{
 						GetHostVolume(dockerSocketVolumeName, dockerSocketVolumePath, corev1.HostPathSocket),
 						//GetHostVolume(scopePluginsVolumeName, scopePluginsVolumePath, corev1.HostPathDirectory),
-						//GetHostVolume(scopeKernelDebugVolumeName, scopeKernelDebugVolumePath, corev1.HostPathDirectory),
+						GetHostVolume(scopeKernelDebugVolumeName, scopeKernelDebugVolumePath, corev1.HostPathDirectoryOrCreate),
 					},
 					Containers: []corev1.Container{
 						{
@@ -47,7 +50,7 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 							VolumeMounts: []corev1.VolumeMount{
 								{Name: dockerSocketVolumeName, MountPath: dockerSocketVolumePath},
 								//{Name: scopePluginsVolumeName, MountPath: scopePluginsVolumePath},
-								//{Name: scopeKernelDebugVolumeName, MountPath: scopeKernelDebugVolumePath},
+								{Name: scopeKernelDebugVolumeName, MountPath: scopeKernelDebugVolumePath},
 							},
 							Args: []string{
 								"--mode=probe",

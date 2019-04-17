@@ -10,13 +10,11 @@ import (
 
 func getKiteService(cr *appv1alpha1.Orca) *corev1.Service {
 
-	labels := GetLabels(name + "=" + kite)
-
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      kite,
 			Namespace: cr.Namespace,
-			Labels:    labels,
+			Labels:    GetLabels(name + "=" + kite),
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
@@ -50,7 +48,7 @@ func getKiteService(cr *appv1alpha1.Orca) *corev1.Service {
 					},
 				},
 			},
-			Selector: labels,
+			Selector: GetLabels(app + "=" + kite),
 		},
 	}
 }

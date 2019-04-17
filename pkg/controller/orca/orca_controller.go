@@ -119,7 +119,15 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch}, []string{""}, []string{ResourceEndpoints, ResourceNamespaces, ResourceNodes, ResourcePods, ResourceServices, ResourceSecrets}),
 	)
 
-	conntrackCR := GetClusterRole(conntrack, GetLabels(name+"="+conntrack), GetPolicyRule([]string{VerbAll}, []string{VerbAll}, []string{VerbAll}))
+	conntrackCR := GetClusterRole(conntrack, GetLabels(name+"="+conntrack),
+		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch}, []string{""}, []string{ResourceNamespaces, ResourceNodes, ResourcePods + "/log", ResourceServices, ResourcePersistentVolumes, ResourcePersistentVolumeClaims}),
+		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch, VerbDelete}, []string{""}, []string{ResourcePods}),
+		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch}, []string{"apps"}, []string{"statefulsets"}),
+		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch}, []string{"batch"}, []string{ResourceJobs, ResourceCronJobs}),
+		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch}, []string{"extensions"}, []string{ResourceDaemonSets, ResourceDeployments}),
+		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch}, []string{"storage.k8s.io"}, []string{ResourceStorageClasses}),
+		GetPolicyRule([]string{VerbGet, VerbUpdate}, []string{"extensions"}, []string{ResourceDeployments + "/scale"}),
+	)
 
 	kiteCRB := GetClusterRoleBindig(kite, kiteSA, kiteCR)
 	conntrackCRB := GetClusterRoleBindig(conntrack, conntrackSA, conntrackCR)
