@@ -9,7 +9,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -141,7 +141,7 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 		return reconcileResult, err
 	}
 
-	reconcileResult, err = r.createKiteService(instance, service, request)
+	reconcileResult, err = r.createService(instance, service, request)
 	if err != nil {
 		return reconcileResult, err
 	}
@@ -171,7 +171,7 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 		return reconcileResult, err
 	}
 
-	reconcileResult, err = r.createKiteDeployment(instance, deployment, request)
+	reconcileResult, err = r.createDeployment(instance, deployment, request)
 	if err != nil {
 		return reconcileResult, err
 	}
@@ -180,10 +180,10 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 	return reconcileResult, err
 }
 
-func (r *ReconcileOrca) createKiteDeployment(instance *appv1alpha1.Orca, deployment *appsv1.Deployment, request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileOrca) createDeployment(instance *appv1alpha1.Orca, deployment *appsv1.Deployment, request reconcile.Request) (reconcile.Result, error) {
 
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Deploying Kite")
+	reqLogger.Info("Deploying deployment:", "Deploying.Name", deployment.Name)
 
 	// Set Kite instance as the owner and controller
 	if err := controllerutil.SetControllerReference(instance, deployment, r.scheme); err != nil {
@@ -212,10 +212,10 @@ func (r *ReconcileOrca) createKiteDeployment(instance *appv1alpha1.Orca, deploym
 
 }
 
-func (r *ReconcileOrca) createKiteService(instance *appv1alpha1.Orca, service *corev1.Service, request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileOrca) createService(instance *appv1alpha1.Orca, service *corev1.Service, request reconcile.Request) (reconcile.Result, error) {
 
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Deploying Kite Service")
+	reqLogger.Info("Deploying Service", "Service.Name", service.Name)
 
 	// Set Kite instance as the owner and controller
 	if err := controllerutil.SetControllerReference(instance, service, r.scheme); err != nil {
@@ -227,6 +227,7 @@ func (r *ReconcileOrca) createKiteService(instance *appv1alpha1.Orca, service *c
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: service.Name, Namespace: service.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		reqLogger.Info("Creating a new deployment", "service.Namespace", service.Namespace, "service.Name", service.Name)
+
 		err = r.client.Create(context.TODO(), service)
 		if err != nil {
 			return reconcile.Result{}, err
@@ -278,34 +279,7 @@ func (r *ReconcileOrca) createServiceAccount(instance *appv1alpha1.Orca, service
 
 func (r *ReconcileOrca) createClusterRole(instance *appv1alpha1.Orca, clusterRole *rbacv1.ClusterRole, request reconcile.Request) (reconcile.Result, error) {
 
-	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Deploying Cluster Role: " + clusterRole.Name)
-
-	// Set clusterRole instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, clusterRole, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	// Check if the clusterRole already exists
-	found := &rbacv1.ClusterRole{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: clusterRole.Name, Namespace: clusterRole.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating a new clusterRole", "clusterRole.Namespace", clusterRole.Namespace, "clusterRole.Name", clusterRole.Name)
-		err = r.client.Create(context.TODO(), clusterRole)
-		if err != nil {
-			return reconcile.Result{}, err
-		}
-
-		// clusterRole created successfully - don't requeue
-		return reconcile.Result{}, nil
-	} else if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	// clusterRole already exists - don't requeue
-	reqLogger.Info("Skip reconcile: clusterRole already exists", "clusterRole.Namespace", found.Namespace, "clusterRole.Name", found.Name)
-	return reconcile.Result{}, nil
-
+	return r.handleReconcile(instance, clusterRole, &rbacv1.ClusterRole{})
 }
 
 func (r *ReconcileOrca) createClusterRoleBinding(instance *appv1alpha1.Orca, clusterRoleBinding *rbacv1.ClusterRoleBinding, request reconcile.Request) (reconcile.Result, error) {
@@ -342,32 +316,32 @@ func (r *ReconcileOrca) createClusterRoleBinding(instance *appv1alpha1.Orca, clu
 
 func (r *ReconcileOrca) createConntrackDaemonset(instance *appv1alpha1.Orca, daemonset *appsv1.DaemonSet, request reconcile.Request) (reconcile.Result, error) {
 
-	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Deploying Conntrack")
+	return r.handleReconcile(instance, daemonset, &appsv1.DaemonSet{})
+}
 
-	// Set Kite instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, daemonset, r.scheme); err != nil {
+func (r *ReconcileOrca) handleReconcile(instance *appv1alpha1.Orca, required metav1.Object, found runtime.Object) (reconcile.Result, error) {
+
+	reqLogger := log.WithValues("Request.Namespace", required.GetNamespace(), "Request.Name", required.GetName())
+	//resourceName := resource
+	//resourceNamespace := resource.GetNamespace()
+	// Set Operator instance as the owner and controller or the resource
+	if err := controllerutil.SetControllerReference(instance, required, r.scheme); err != nil {
 		return reconcile.Result{}, err
 	}
 
-	// Check if the Daemonset already exists
-	found := &appsv1.DaemonSet{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: daemonset.Name, Namespace: daemonset.Namespace}, found)
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: required.GetName(), Namespace: required.GetNamespace()}, found)
 	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating a new daemonset", "daemonset.Namespace", daemonset.Namespace, "daemonset.Name", daemonset.Name)
-		err = r.client.Create(context.TODO(), daemonset)
+		reqLogger.Info("Creating a new Resource", "Resource.Namespace", required.GetNamespace(), "Resource.Name", required.GetName())
+		err = r.client.Create(context.TODO(), required.(runtime.Object))
 		if err != nil {
 			return reconcile.Result{}, err
 		}
 
-		// daemonset created successfully - don't requeue
+		// resource created successfully - don't requeue
 		return reconcile.Result{}, nil
 	} else if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	// daemonset already exists - don't requeue
-	reqLogger.Info("Skip reconcile: daemonset already exists", "daemonset.Namespace", found.Namespace, "deployment.Name", found.Name)
 	return reconcile.Result{}, nil
-
 }
