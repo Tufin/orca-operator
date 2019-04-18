@@ -17,7 +17,7 @@ spec:
       containers:
         - name: orca-operator
           # Replace this with the built image name
-          image: docker.io/tufin/orca-operator
+          image: docker.io/tufin/orca-operator:latest
           command:
           - orca-operator
           imagePullPolicy: Always

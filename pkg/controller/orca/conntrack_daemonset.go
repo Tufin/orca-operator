@@ -13,6 +13,10 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 	labels := GetLabels(app + "=" + conntrack)
 
 	return &appsv1.DaemonSet{
+		TypeMeta: metav1.TypeMeta{
+			Kind: "DaemonSet",
+			//APIVersion: "",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      conntrack,
 			Namespace: cr.Namespace,

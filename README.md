@@ -35,6 +35,15 @@ kubectl create -f deploy/crds/tufin_v1alpha1_orca_cr.yaml
 operator-sdk generate k8s
 ```
 
+# Deploying on RH OpenShift
+In order to deploy in OpenShift we need to add `SecurityContextConstraints` 
+to 'kite & conntrack' service accounts as follows:
+
+```
+oc adm policy add-scc-to-user privileged -z kite -n tufin-system
+oc adm policy add-scc-to-user privileged -z conntrack -n tufin-system
+```
+
 # Details
 https://github.com/operator-framework/operator-sdk
 https://github.com/operator-framework/operator-sdk/blob/master/doc/user-guide.md
