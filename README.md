@@ -4,7 +4,7 @@ Kubernetes Operator for deploying Orca Agent (Kite etc.)
 # Build
 ```
 operator-sdk generate k8s
-operator-sdk build tufin/orca-operator
+operator-sdk build tufin/orca-operator --docker-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${OPENSHIFT_RELEASE}"
 docker push tufin/orca-operator
 ```
 
