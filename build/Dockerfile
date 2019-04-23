@@ -4,6 +4,9 @@ ENV OPERATOR=/usr/local/bin/orca-operator \
     USER_UID=1001 \
     USER_NAME=orca-operator
 
+ARG version
+ARG release
+
 LABEL name=orca-operator
 LABEL vendor=Tufin
 LABEL version=$version
