@@ -37,10 +37,15 @@ operator-sdk generate k8s
 
 # Deploying on RH OpenShift
 In order to deploy in OpenShift we need to add `SecurityContextConstraints` 
-to 'kite & conntrack' service accounts as follows:
+to 'the operator, kite & conntrack' service accounts as follows:
 
 ```
-oc adm policy add-scc-to-user privileged -z kite -n tufin-system
+# for kite
+oc adm policy add-scc-to-user hostaccess -z kite -n tufin-system
+oc adm policy add-scc-to-user hostnetwork -z kite -n tufin-system
+oc adm policy add-scc-to-user node-exporter -z kite -n tufin-system
+
+# for conntrack
 oc adm policy add-scc-to-user privileged -z conntrack -n tufin-system
 ```
 

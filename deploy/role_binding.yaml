@@ -5,9 +5,37 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: orca-operator
-  # Replace this with the namespace the operator is deployed in.
   namespace: tufin-system
 roleRef:
   kind: ClusterRole
-  name: cluster-admin
+  name: orca-operator
   apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kite
+subjects:
+- kind: ServiceAccount
+  name: kite
+  namespace: tufin-system
+roleRef:
+  kind: ClusterRole
+  name: kite
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: conntrack
+  namespace: tufin-system
+  labels:
+    name: conntrack
+roleRef:
+  kind: ClusterRole
+  name: conntrack
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: conntrack
+  namespace: tufin-system

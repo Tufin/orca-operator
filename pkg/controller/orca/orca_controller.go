@@ -8,7 +8,6 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -21,6 +20,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	"fmt"
 )
 
 var log = logf.Log.WithName("controller_orca")
@@ -103,53 +103,18 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
 			return reconcile.Result{}, nil
+		} else if !errors.IsNotFound(err) {
+			reqLogger.Info("CRD updated")
 		}
-		// Error reading the object - requeue the request.
-		return reconcile.Result{}, err
 	}
-
-	// service accounts
-	kiteNameLabel := GetLabels(name + "=" + kite)
-
-	kiteSA := GetServiceAccount(kite, instance.Namespace, kiteNameLabel)
-	conntrackSA := GetServiceAccount(conntrack, instance.Namespace, GetLabels(name+"="+conntrack))
-
-	kiteCR := GetClusterRole(kite, kiteNameLabel,
-		GetPolicyRule([]string{VerbAll}, []string{"networking.k8s.io"}, []string{"networkpolicies"}),
-		GetPolicyRule([]string{VerbAll}, []string{"config.istio.io"}, []string{VerbAll}),
-		GetPolicyRule([]string{VerbAll}, []string{"istio.io"}, []string{"istioconfigs", "istioconfigs.istio.io"}),
-		GetPolicyRule([]string{VerbAll}, []string{"apiextensions.k8s.io"}, []string{"customresourcedefinitions"}),
-		GetPolicyRule([]string{VerbAll}, []string{"extensions"}, []string{"thirdpartyresources", "thirdpartyresources.extensions", ResourceIngresses, "ingresses/status"}),
-		GetPolicyRule([]string{VerbAll}, []string{""}, []string{ResourceConfigMaps}),
-		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch}, []string{""}, []string{ResourceEndpoints, ResourceNamespaces, ResourceNodes, ResourcePods, ResourceServices, ResourceSecrets}),
-	)
-
-	conntrackCR := GetClusterRole(conntrack, GetLabels(name+"="+conntrack),
-		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch}, []string{""}, []string{ResourceNamespaces, ResourceNodes, ResourcePods + "/log", ResourceServices, ResourcePersistentVolumes, ResourcePersistentVolumeClaims}),
-		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch, VerbDelete}, []string{""}, []string{ResourcePods}),
-		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch}, []string{"apps"}, []string{"statefulsets"}),
-		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch}, []string{"batch"}, []string{ResourceJobs, ResourceCronJobs}),
-		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch}, []string{"extensions"}, []string{ResourceDaemonSets, ResourceDeployments}),
-		GetPolicyRule([]string{VerbGet, VerbList, VerbWatch}, []string{"storage.k8s.io"}, []string{ResourceStorageClasses}),
-		GetPolicyRule([]string{VerbGet, VerbUpdate}, []string{"extensions"}, []string{ResourceDeployments + "/scale"}),
-	)
-
-	kiteCRB := GetClusterRoleBindig(kite, kiteSA, kiteCR)
-	conntrackCRB := GetClusterRoleBindig(conntrack, conntrackSA, conntrackCR)
 
 	kiteDeployment := getKiteDeployment(instance)
 	kiteService := getKiteService(instance)
 	conntrackDaemonset := getConntrackDaemonset(instance)
 
 	reconcileResult, err := r.createResourceArray(instance,
-		ResourceRequest{Required: kiteSA, RequiredStruct: &corev1.ServiceAccount{}},
-		ResourceRequest{Required: kiteCR, RequiredStruct: &rbacv1.ClusterRole{}},
-		ResourceRequest{Required: kiteCRB, RequiredStruct: &rbacv1.ClusterRoleBinding{}},
 		ResourceRequest{Required: kiteDeployment, RequiredStruct: &appsv1.Deployment{}},
 		ResourceRequest{Required: kiteService, RequiredStruct: &corev1.Service{}},
-		ResourceRequest{Required: conntrackSA, RequiredStruct: &corev1.ServiceAccount{}},
-		ResourceRequest{Required: conntrackCR, RequiredStruct: &rbacv1.ClusterRole{}},
-		ResourceRequest{Required: conntrackCRB, RequiredStruct: &rbacv1.ClusterRoleBinding{}},
 		ResourceRequest{Required: conntrackDaemonset, RequiredStruct: &appsv1.DaemonSet{}},
 	)
 
@@ -174,16 +139,12 @@ func (r *ReconcileOrca) createResourceArray(instance *appv1alpha1.Orca, resource
 
 func (r *ReconcileOrca) createResource(instance *appv1alpha1.Orca, required metav1.Object, requiredStruct runtime.Object) (reconcile.Result, error) {
 
-	kind := requiredStruct.GetObjectKind().GroupVersionKind().Kind
-	reqLogger := log.WithValues("Kind", kind, "Namespace", required.GetNamespace(), "Resource Name", required.GetName())
+	reqLogger := log.WithValues("Kind", fmt.Sprintf("%T", requiredStruct), "Namespace", required.GetNamespace(), "Resource Name", required.GetName())
 	ns := required.GetNamespace()
 
 	if err := controllerutil.SetControllerReference(instance, required, r.scheme); err != nil {
+		reqLogger.Error(err, "Failed to set the operator as the resource owner")
 		return reconcile.Result{}, err
-	}
-
-	if kind == "ClusterRoleBinding" {
-		ns = ""
 	}
 
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: required.GetName(), Namespace: ns}, requiredStruct)
@@ -198,8 +159,23 @@ func (r *ReconcileOrca) createResource(instance *appv1alpha1.Orca, required meta
 		reqLogger.Info("Resource created successfully")
 		return reconcile.Result{}, nil
 	} else if err != nil {
-		reqLogger.Info("Resource already exists")
+
 		return reconcile.Result{}, err
+	} else {
+		reqLogger.Info("Resource already exists, trying to update...")
+
+		err = r.client.Delete(context.TODO(), requiredStruct)
+		if err != nil {
+			reqLogger.Error(err, "Resource update failed, deletion failed")
+			return reconcile.Result{}, err
+		}
+		err = r.client.Create(context.TODO(), required.(runtime.Object))
+		if err != nil {
+			reqLogger.Error(err, "Resource update failed, creation failed")
+			return reconcile.Result{}, err
+		}
+
+		reqLogger.Info("Resource update succeeded")
 	}
 
 	return reconcile.Result{}, nil
