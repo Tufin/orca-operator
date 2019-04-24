@@ -101,7 +101,7 @@ func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
 									Value: BoolToString(cr.Spec.Components["watcher"]),
 								},
 								{
-									Name:  "TUFIN_INSTALL_KUBE_EVENTS_WATCHER_NETWORK_POLICY",
+									Name:  "TUFIN_INSTALL_NETWORK_POLICY",
 									Value: BoolToString(cr.Spec.Components["kube-network-policy"]),
 								},
 								// secrets
