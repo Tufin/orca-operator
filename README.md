@@ -25,7 +25,8 @@ kubectl create -f deploy/crds/tufin_v1alpha1_orca_crd.yaml
 kubectl create -f deploy/operator.yaml
 ```
 
-# Create the Kite CR - the default controller will watch for Kite objects and install the agent
+# Create the Kite CR
+The controller will watch for these CRD and install the Orca agent components (kite, conntrack etc.):
 ```
 kubectl create -f deploy/crds/tufin_v1alpha1_orca_cr.yaml
 ```
