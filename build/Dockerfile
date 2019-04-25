@@ -16,6 +16,7 @@ LABEL description="The Orca Operator is a component of Tufin Orca which is respo
 
 # install operator binary
 COPY build/_output/bin/orca-operator ${OPERATOR}
+COPY licenses/ /licenses/
 
 COPY build/bin /usr/local/bin
 RUN  /usr/local/bin/user_setup
