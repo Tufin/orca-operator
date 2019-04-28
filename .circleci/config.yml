@@ -8,12 +8,24 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Build
+          name: Generate code from orca_types.go 
           command: |
             operator-sdk generate k8s
+      - run:
+          name: Build operator
+          command: |
             operator-sdk build tufin/orca-operator --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${OPENSHIFT_RELEASE}"
+      - run:
+          name: Validate artifact
+          command: |
+            mkdir artifact
+            cp orca-operator.0.1.0.clusterserviceversion.yaml artifact/
+            cp orca.package.yaml artifact/
+            cp deploy/crds/tufin_v1alpha1_orca_crd.yaml artifact/
+            docker run -v `pwd`:`pwd` -w `pwd` -it tufin/operator-courier operator-courier verify artifact
       - run:
           name: Push docker image
           command: |
             echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
             docker push tufin/orca-operator
+            
