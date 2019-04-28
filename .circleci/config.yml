@@ -6,12 +6,12 @@ jobs:
       - image: tufinim/circleci-go:master
     steps:
       - checkout
+      - setup_remote_docker
       - run:
           name: Build
           command: |
             operator-sdk generate k8s
             operator-sdk build tufin/orca-operator --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${OPENSHIFT_RELEASE}"
-      - setup_remote_docker
       - run:
           name: Push docker image
           command: |
