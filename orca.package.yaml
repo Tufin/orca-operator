@@ -1,0 +1,4 @@
+packageName: orca
+channels:
+- name: beta
+  currentCSV: istio-operator.0.1.0
