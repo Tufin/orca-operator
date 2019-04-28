@@ -3,6 +3,15 @@ kind: ClusterServiceVersion
 metadata: 
   name: orca-operator.0.1.0
   namespace: placeholder
+  annotations: 
+    capabilities: 
+    categories: Security Policy Management
+    description: Installs the Tufin Orca client
+    certified: "false"
+    containerImage: tufin/orca-operator
+    repository: https://github.com/Tufin/orca-operator
+    createdAt: "2019-04-28T08:00:00Z"
+    support: Tufin
 spec: 
   customresourcedefinitions: 
     owned: 
