@@ -16,15 +16,15 @@ jobs:
           command: |
             operator-sdk build tufin/orca-operator --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${OPENSHIFT_RELEASE}"
       - run:
-          name: Validate artifact
+          name: Validate artifacts
           command: |
             # create a dummy container which will hold a volume with config
-            docker create -v /artifact --name configs alpine:3.4 /bin/true
+            docker create -v /artifacts --name configs alpine:3.4 /bin/true
             # copy artifact files into this volume
-            docker cp orca-operator.0.1.0.clusterserviceversion.yaml configs:/artifact
-            docker cp orca.package.yaml configs:/artifact
-            docker cp deploy/crds/tufin_v1alpha1_orca_crd.yaml configs:/artifact
-            docker run --volumes-from configs tufin/operator-courier operator-courier verify /artifact
+            docker cp orca-operator.0.1.0.clusterserviceversion.yaml configs:/artifacts
+            docker cp orca.package.yaml configs:/artifacts
+            docker cp deploy/crds/tufin_v1alpha1_orca_crd.yaml configs:/artifacts
+            docker run --volumes-from configs tufin/operator-courier --verbose operator-courier verify /artifacts
       - run:
           name: Push docker image
           command: |
