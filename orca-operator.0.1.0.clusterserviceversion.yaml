@@ -4,7 +4,7 @@ metadata:
   name: orca-operator.0.1.0
   namespace: placeholder
   annotations: 
-    capabilities: 
+    capabilities: Basic Install
     categories: Security Policy Management
     description: Installs the Tufin Orca client
     certified: "false"
