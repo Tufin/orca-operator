@@ -111,6 +111,30 @@ spec:
                     - name: OPERATOR_NAME
                       value: "orca-operator"
     permissions: 
+      - clusterPermissions:
+        - rules:
+            - verbs:
+                - use
+              apiGroups:
+                - security.openshift.io
+              resources:
+                - securitycontextconstraints
+              resourceNames:
+                - privileged
+          serviceAccountName: conntrack      
+      - clusterPermissions:
+        - rules:
+            - verbs:
+                - use
+              apiGroups:
+                - security.openshift.io
+              resources:
+                - securitycontextconstraints
+              resourceNames:
+                - hostaccess
+                - hostnetwork
+                - node-exporter
+          serviceAccountName: kite      
       - serviceAccountName: orca-operator
         rules:
         - apiGroups:
