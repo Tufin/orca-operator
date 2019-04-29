@@ -6,7 +6,7 @@ metadata:
   annotations: 
     capabilities: Basic Install
     categories: Security Policy Management
-    description: Installs the Tufin Orca client
+    description: Installs an agent in the cluster that works with Tufin Orca to enable security policy management.
     certified: "false"
     containerImage: tufin/orca-operator
     repository: https://github.com/Tufin/orca-operator
@@ -31,11 +31,22 @@ spec:
             displayName: project
             path: project
         version: v1alpha1
-  description: |
-    # Orca Operator
-
+  description: |-
     Tufin Orca is a cloud-based security monitoring and enforcement platform for Kubernetes clusters, containers and microservices.
-  displayName: Orca
+
+    The Orca Operator installs an agent into the monitored cluster which works in combination with the Orca service to:
+    * Monitor the cluster configuration: namespaces, containers, pods, services, network policies etc.
+    * Learn and visualize the cluster connectivity
+    * Build a connectivity policy (whitelist)
+    * Generate audit reports 
+    * Alert on unauthorized connections
+    * Enforce the connectivity policy in the cluster and on enterpise firewalls surrounding the cluster
+    * Integrate into the CI/CD pipeline to learn and update the policy continuously
+    * Scan images for vulnerabilities
+    ## Deploying the agent
+    The agent requires a token to connect to the Orca service.
+    To get the token, [signup to Orca](https://www.tufin.com/products/tufin-orca#s6)
+  displayName: Tufin Orca Operator
   version: 0.1.0
   maturity: beta
   keywords: 
