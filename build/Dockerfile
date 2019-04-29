@@ -12,7 +12,7 @@ LABEL vendor=Tufin
 LABEL version=$version
 LABEL release=$release
 LABEL summary="Tufin Orca is a security solution that enables automation of network security policies for applications running on Kubernetes platforms."
-LABEL description="The Orca Operator is a component of Tufin Orca which is responsible for deploying the Orca client into a Kubernetes cluster."
+LABEL description="Orca Operator deploys the Orca agent into a Kubernetes cluster."
 
 # install operator binary
 COPY build/_output/bin/orca-operator ${OPERATOR}

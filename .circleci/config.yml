@@ -4,6 +4,8 @@ jobs:
     working_directory: /go/src/github.com/tufin/orca-operator
     docker:
       - image: tufinim/circleci-go:master
+    environment:
+      RELEASE: 0.1.0
     steps:
       - checkout
       - setup_remote_docker
@@ -14,7 +16,7 @@ jobs:
       - run:
           name: Build operator
           command: |
-            operator-sdk build tufin/orca-operator --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${OPENSHIFT_RELEASE}"
+            operator-sdk build tufin/orca-operator --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
       - run:
           name: Validate artifacts
           command: |
@@ -29,5 +31,6 @@ jobs:
           name: Push docker image
           command: |
             echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
-            docker push tufin/orca-operator
+            docker tag tufin/orca-operator tufin/orca-operator:${RELEASE}
+            docker push tufin/orca-operator:${RELEASE}
             

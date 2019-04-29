@@ -8,7 +8,7 @@ metadata:
     categories: Security Policy Management
     description: Installs an agent in the cluster that works with Tufin Orca to enable security policy management.
     certified: "false"
-    containerImage: tufin/orca-operator
+    containerImage: tufin/orca-operator:0.1.0
     repository: https://github.com/Tufin/orca-operator
     createdAt: "2019-04-28T08:00:00Z"
     support: Tufin
