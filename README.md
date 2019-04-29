@@ -3,7 +3,7 @@ Kubernetes Operator for deploying Orca Agent (Kite etc.)
 
 # Build
 ```
-operator-sdk generate k8s
+operator-sdk generate k8s # only needed after changing kite_types.go
 operator-sdk build tufin/orca-operator --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${OPENSHIFT_RELEASE}"
 docker push tufin/orca-operator
 ```
@@ -29,11 +29,6 @@ kubectl create -f deploy/operator.yaml
 The controller will watch for these CRD and install the Orca agent components (kite, conntrack etc.):
 ```
 kubectl create -f deploy/crds/tufin_v1alpha1_orca_cr.yaml
-```
-
-# After changing kite_types.go, run:
-```
-operator-sdk generate k8s
 ```
 
 # Deploying on RH OpenShift
