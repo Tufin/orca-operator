@@ -111,12 +111,12 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 			return reconcile.Result{}, nil
 		}
 	} else {
-		reqLogger.Info("CRD updated")
+		reqLogger.Info("CRD updated", "Current Status: ", instance.Status.Ready)
 		r.UpdateStatus(instance, StatusUpdated)
 	}
 
-	if instance.Status.Ready != (StatusUpdated) {
-		return reconcile.Result{Requeue: false}, nil
+	if instance.Status.Ready != StatusUpdated {
+		return reconcile.Result{}, nil
 	}
 
 	kiteDeployment := getKiteDeployment(instance)
