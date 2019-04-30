@@ -116,7 +116,7 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 		r.UpdateStatus(instance, StatusUpdated)
 	}
 
-	if strings.Compare(instance.Status.Ready, StatusUpdated) == 0 {
+	if strings.Compare(instance.Status.Ready, StatusUpdated) != 0 {
 		reqLogger.Info("CRD", "Status is not updated", instance.Status.Ready)
 		return reconcile.Result{}, nil
 	}
