@@ -31,12 +31,12 @@ jobs:
           name: Push to dockerhub
           command: |
             echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
-            docker tag tufin/orca-operator tufin/orca-operator:${RELEASE}
-            docker push tufin/orca-operator:${RELEASE}
+            docker tag tufin/orca-operator tufin/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
+            docker push tufin/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
       - run:
           name: Push to redhat registry
           command: |
             echo ${REDHAT_PASS} | docker login -u unused scan.connect.redhat.com --password-stdin
-            docker tag tufin/orca-operator scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${RELEASE}
-            docker push scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${RELEASE}
+            docker tag tufin/orca-operator scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
+            docker push scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
             
