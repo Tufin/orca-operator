@@ -21,7 +21,6 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 	"fmt"
-	"strings"
 )
 
 var log = logf.Log.WithName("controller_orca")
@@ -116,7 +115,7 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 		r.UpdateStatus(instance, StatusUpdated)
 	}
 
-	if strings.Compare(instance.Status.Ready, StatusUpdated) != 0 {
+	if instance.Status.Ready != StatusUpdated {
 		reqLogger.Info("CRD", "Status is not updated", instance.Status.Ready)
 		return reconcile.Result{}, nil
 	}
