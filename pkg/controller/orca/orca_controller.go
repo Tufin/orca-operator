@@ -126,6 +126,7 @@ func (r *ReconcileOrca) createResourceArray(instance *appv1alpha1.Orca, resource
 
 	var reconcileResult reconcile.Result
 	var err error
+	instance.Status.Ready = false
 
 	for _, resourceRequest := range resources {
 		reconcileResult, err = r.createResource(instance, resourceRequest.Required, resourceRequest.RequiredStruct)
@@ -133,6 +134,8 @@ func (r *ReconcileOrca) createResourceArray(instance *appv1alpha1.Orca, resource
 			break
 		}
 	}
+
+	instance.Status.Ready = true
 
 	return reconcileResult, err
 }

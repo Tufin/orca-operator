@@ -13,13 +13,16 @@ type OrcaSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html
+
 	Domain             string            `json:"domain,omitempty"`
 	Project            string            `json:"project,omitempty"`
 	IngnoredConfigMaps []string          `json:"ignored_config_maps,omitempty"`
 	Components         map[string]bool   `json:"components,omitempty"`
 	EndPoints          map[string]string `json:"endpoints,omitempty"`
 	Images             map[string]string `json:"images,omitempty"`
-	KubePlatform       string            `json:"kube_platform,omitempty"`
+
+	// +kubebuilder:validation:Enum=OpenShift,DockerEE,GKE,AKS,EKS,Unknown
+	KubePlatform string `json:"kube_platform,omitempty"`
 }
 
 // OrcaStatus defines the observed state of Orca
@@ -28,6 +31,9 @@ type OrcaStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html
+
+	// +kubebuilder:validation:Enum=true,false,TRUE,FALSE
+	Ready bool
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -48,7 +54,7 @@ type Orca struct {
 type OrcaList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Orca `json:"items"`
+	Items []Orca    `json:"items"`
 }
 
 func init() {
