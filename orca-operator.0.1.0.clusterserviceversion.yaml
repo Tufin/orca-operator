@@ -2,7 +2,7 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata: 
   name: orca-operator.0.1.0
-  namespace: placeholder
+  namespace: tufin-system
   annotations: 
     capabilities: Basic Install
     categories: Security Policy Management
