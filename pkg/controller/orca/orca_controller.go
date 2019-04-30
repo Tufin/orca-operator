@@ -30,8 +30,14 @@ var log = logf.Log.WithName("controller_orca")
 * business logic.  Delete these comments after modifying this file.*
  */
 
-// Add creates a new Orca Controller and adds it to the Manager. The Manager will set fields on the Controller
-// and Start it when the Manager is Started.
+const (
+	StatusUnknown  = "Unknown"
+	StatusCreating = "Creating"
+	StatusUpdated  = "Updated"
+	StatusReady    = "Ready"
+	StatusFailed   = "Failed"
+)
+
 func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr))
 }
@@ -103,9 +109,14 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
 			return reconcile.Result{}, nil
-		} else if !errors.IsNotFound(err) {
-			reqLogger.Info("CRD updated")
 		}
+	} else {
+		reqLogger.Info("CRD updated")
+		r.UpdateStatus(instance, StatusUpdated)
+	}
+
+	if instance.Status.Ready != (StatusUpdated) {
+		return reconcile.Result{Requeue: false}, nil
 	}
 
 	kiteDeployment := getKiteDeployment(instance)
@@ -126,15 +137,29 @@ func (r *ReconcileOrca) createResourceArray(instance *appv1alpha1.Orca, resource
 
 	var reconcileResult reconcile.Result
 	var err error
+	r.UpdateStatus(instance, StatusCreating)
 
 	for _, resourceRequest := range resources {
 		reconcileResult, err = r.createResource(instance, resourceRequest.Required, resourceRequest.RequiredStruct)
 		if err != nil {
-			break
+			r.UpdateStatus(instance, StatusFailed)
+			return reconcileResult, err
 		}
 	}
 
+	r.UpdateStatus(instance, StatusReady)
+
 	return reconcileResult, err
+}
+
+func (r *ReconcileOrca) UpdateStatus(instance *appv1alpha1.Orca, status string) error {
+
+	var err error
+
+	instance.Status.Ready = status
+	err = r.client.Status().Update(context.TODO(), instance)
+
+	return err
 }
 
 func (r *ReconcileOrca) createResource(instance *appv1alpha1.Orca, required metav1.Object, requiredStruct runtime.Object) (reconcile.Result, error) {
@@ -157,7 +182,7 @@ func (r *ReconcileOrca) createResource(instance *appv1alpha1.Orca, required meta
 		}
 
 		reqLogger.Info("Resource created successfully")
-		return reconcile.Result{}, nil
+		return reconcile.Result{Requeue: false}, nil
 	} else if err != nil {
 
 		return reconcile.Result{}, err
@@ -178,5 +203,8 @@ func (r *ReconcileOrca) createResource(instance *appv1alpha1.Orca, required meta
 		reqLogger.Info("Resource update succeeded")
 	}
 
-	return reconcile.Result{}, nil
+	return reconcile.Result{
+		Requeue:      false,
+		RequeueAfter: 0,
+	}, nil
 }
