@@ -33,6 +33,7 @@ var log = logf.Log.WithName("controller_orca")
 const (
 	StatusUnknown  = "Unknown"
 	StatusCreating = "Creating"
+	StatusUpdated  = "Updated"
 	StatusReady    = "Ready"
 	StatusFailed   = "Failed"
 )
@@ -108,12 +109,13 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
 			return reconcile.Result{}, nil
-		} else if !errors.IsNotFound(err) {
-			reqLogger.Info("CRD updated")
 		}
+	} else {
+		reqLogger.Info("CRD updated")
+		r.UpdateStatus(instance, StatusUpdated)
 	}
 
-	if instance.Status.Ready == StatusCreating {
+	if instance.Status.Ready != (StatusUpdated) {
 		return reconcile.Result{Requeue: false}, nil
 	}
 
