@@ -119,6 +119,8 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 		return reconcile.Result{}, nil
 	}
 
+	r.UpdateStatus(instance, StatusCreating)
+
 	kiteDeployment := getKiteDeployment(instance)
 	kiteService := getKiteService(instance)
 	conntrackDaemonset := getConntrackDaemonset(instance)
@@ -137,7 +139,6 @@ func (r *ReconcileOrca) createResourceArray(instance *appv1alpha1.Orca, resource
 
 	var reconcileResult reconcile.Result
 	var err error
-	r.UpdateStatus(instance, StatusCreating)
 
 	for _, resourceRequest := range resources {
 		reconcileResult, err = r.createResource(instance, resourceRequest.Required, resourceRequest.RequiredStruct)
@@ -167,6 +168,10 @@ func (r *ReconcileOrca) createResource(instance *appv1alpha1.Orca, required meta
 	reqLogger := log.WithValues("Kind", fmt.Sprintf("%T", requiredStruct), "Namespace", required.GetNamespace(), "Resource Name", required.GetName())
 	ns := required.GetNamespace()
 
+	if instance.Status.Ready != StatusCreating {
+		return reconcile.Result{}, nil
+	}
+
 	if err := controllerutil.SetControllerReference(instance, required, r.scheme); err != nil {
 		reqLogger.Error(err, "Failed to set the operator as the resource owner")
 		return reconcile.Result{}, err
@@ -182,7 +187,7 @@ func (r *ReconcileOrca) createResource(instance *appv1alpha1.Orca, required meta
 		}
 
 		reqLogger.Info("Resource created successfully")
-		return reconcile.Result{Requeue: false}, nil
+		return reconcile.Result{}, nil
 	} else if err != nil {
 
 		return reconcile.Result{}, err
@@ -203,8 +208,5 @@ func (r *ReconcileOrca) createResource(instance *appv1alpha1.Orca, required meta
 		reqLogger.Info("Resource update succeeded")
 	}
 
-	return reconcile.Result{
-		Requeue:      false,
-		RequeueAfter: 0,
-	}, nil
+	return reconcile.Result{}, nil
 }
