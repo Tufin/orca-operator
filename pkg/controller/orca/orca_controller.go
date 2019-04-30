@@ -21,6 +21,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 	"fmt"
+	"reflect"
 )
 
 var log = logf.Log.WithName("controller_orca")
@@ -33,7 +34,6 @@ var log = logf.Log.WithName("controller_orca")
 const (
 	StatusUnknown  = "Unknown"
 	StatusCreating = "Creating"
-	StatusUpdated  = "Updated"
 	StatusReady    = "Ready"
 	StatusFailed   = "Failed"
 )
@@ -104,23 +104,21 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 	instance := &tufinv1alpha1.Orca{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
+		reqLogger.Error(err, "failed to fetch CRD")
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
 			return reconcile.Result{}, nil
 		}
-	} else {
-		reqLogger.Info("CRD updated", "Current Status", instance.Status.Ready)
-		r.UpdateStatus(instance, StatusUpdated)
+
+		// Error reading the object - requeue the request.
+		return reconcile.Result{}, err
 	}
 
-	if instance.Status.Ready != StatusUpdated {
-		reqLogger.Info("CRD", "Status is not updated", instance.Status.Ready)
+	if instance.Status.Ready != StatusReady && instance.Status.Ready != "" {
 		return reconcile.Result{}, nil
 	}
-
-	r.UpdateStatus(instance, StatusCreating)
 
 	kiteDeployment := getKiteDeployment(instance)
 	kiteService := getKiteService(instance)
@@ -140,6 +138,7 @@ func (r *ReconcileOrca) createResourceArray(instance *appv1alpha1.Orca, resource
 
 	var reconcileResult reconcile.Result
 	var err error
+	instance.Status.Ready = StatusCreating
 
 	for _, resourceRequest := range resources {
 		reconcileResult, err = r.createResource(instance, resourceRequest.Required, resourceRequest.RequiredStruct)
@@ -151,7 +150,7 @@ func (r *ReconcileOrca) createResourceArray(instance *appv1alpha1.Orca, resource
 
 	r.UpdateStatus(instance, StatusReady)
 
-	return reconcileResult, err
+	return reconcile.Result{}, nil
 }
 
 func (r *ReconcileOrca) UpdateStatus(instance *appv1alpha1.Orca, status string) error {
@@ -194,6 +193,11 @@ func (r *ReconcileOrca) createResource(instance *appv1alpha1.Orca, required meta
 		return reconcile.Result{}, err
 	} else {
 		reqLogger.Info("Resource already exists, trying to update...")
+
+		if reflect.DeepEqual(required, requiredStruct.(metav1.Object)) {
+			reqLogger.Info("Resource is already up to date")
+			return reconcile.Result{}, nil
+		}
 
 		err = r.client.Delete(context.TODO(), requiredStruct)
 		if err != nil {
