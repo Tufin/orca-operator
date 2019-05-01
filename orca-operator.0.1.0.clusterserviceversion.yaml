@@ -2,19 +2,19 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   name: orca-operator.0.1.0
-  namespace: tufin-system
+  namespace: placeholder
   annotations:
     alm-examples: |-
       [{
          "apiVersion": "tufin.io/v1alpha1",
          "kind": "Orca",
          "metadata": {
-            "name": "orca",
-            "namespace": "tufin-system"
+            "name": "orca"
          },
          "spec": {
             "domain": "generic-bank",
             "project": "retail",
+            "namespace": "tufin-system",
             "images": {
               "kite": "registry.connect.redhat.com/tufin/kite",
               "conntrack": "registry.connect.redhat.com/tufin/conntrack"
@@ -85,8 +85,8 @@ spec:
     cluster and on enterpise firewalls surrounding the cluster\n* Integrate into the 
     CI/CD pipeline to learn and update the policy continuously\n* Scan images for 
     vulnerabilities\n## Deploying the agent\nThe agent requires a token to connect to 
-    the Orca service.\nTo get the token 
-    [follow the instructions here](https://www.tufin.com/products/tufin-orca#s6)."
+    the Orca service.\nTo get the token [follow the instructions here]
+    (https://forum.tufin.com/support/kc/R_Orca/Content/Topics/30-Getting_Started/OpenShiftOperator.htm)."
   displayName: Tufin Orca Operator
   version: 0.1.0
   maturity: beta
