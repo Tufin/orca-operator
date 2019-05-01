@@ -66,6 +66,12 @@ rules:
   verbs:
   - '*'
 - apiGroups:
+  - networking.tufin.io
+  resources:
+  - policies
+  verbs:
+  - '*'
+- apiGroups:
   - config.istio.io
   resources:
   - '*'
