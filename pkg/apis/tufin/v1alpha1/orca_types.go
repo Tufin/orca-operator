@@ -13,7 +13,7 @@ type OrcaSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html
-
+	Namespace          string            `json:"namespace,omitempty"`
 	Domain             string            `json:"domain,omitempty"`
 	Project            string            `json:"project,omitempty"`
 	IngnoredConfigMaps []string          `json:"ignored_config_maps,omitempty"`

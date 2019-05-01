@@ -15,7 +15,6 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 	return &appsv1.DaemonSet{
 		TypeMeta: metav1.TypeMeta{
 			Kind: "DaemonSet",
-			//APIVersion: "",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      conntrack,
@@ -44,7 +43,6 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 					},
 					Volumes: []corev1.Volume{
 						GetHostVolume(dockerSocketVolumeName, dockerSocketVolumePath, corev1.HostPathSocket),
-						//GetHostVolume(scopePluginsVolumeName, scopePluginsVolumePath, corev1.HostPathDirectory),
 						GetHostVolume(scopeKernelDebugVolumeName, scopeKernelDebugVolumePath, corev1.HostPathDirectoryOrCreate),
 					},
 					Containers: []corev1.Container{
@@ -53,7 +51,6 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 							Image: cr.Spec.Images[conntrack],
 							VolumeMounts: []corev1.VolumeMount{
 								{Name: dockerSocketVolumeName, MountPath: dockerSocketVolumePath},
-								//{Name: scopePluginsVolumeName, MountPath: scopePluginsVolumePath},
 								{Name: scopeKernelDebugVolumeName, MountPath: scopeKernelDebugVolumePath},
 							},
 							Args: []string{

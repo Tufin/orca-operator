@@ -120,6 +120,12 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 		return reconcile.Result{}, nil
 	}
 
+	if instance.Spec.Namespace == "" {
+		instance.Namespace = "default"
+	} else {
+		instance.Namespace = instance.Spec.Namespace
+	}
+
 	kiteDeployment := getKiteDeployment(instance)
 	kiteService := getKiteService(instance)
 	conntrackDaemonset := getConntrackDaemonset(instance)
