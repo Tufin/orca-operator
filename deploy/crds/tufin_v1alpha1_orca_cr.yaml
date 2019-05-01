@@ -2,20 +2,20 @@ apiVersion: tufin.io/v1alpha1
 kind: Orca
 metadata:
   name: orca
-  namespace: tufin-system
 spec:
   domain: generic-bank
   project: openshift
+  namespace: tufin-system
   images:
-    kite: "tufin/kite:staging"
-    conntrack: "docker.io/weaveworks/scope:1.10.1"
+    kite: "registry.connect.redhat.com/tufin/kite"
+    conntrack: "registry.connect.redhat.com/tufin/conntrack"
   ignored_config_maps:
     - kube-system/ingress-gce-lock
     - istio-system/istio-ingress-controller-leader-istio
   endpoints:
-    orca: "https://lightorca.tufin.io"
-    guru: "lightguru.tufin.io:443"
-    registry: lightregistry.tufin.io
+    orca: "https://orca.tufin.io"
+    guru: "guru.tufin.io:443"
+    registry: "registry.tufin.io"
   components:
     dns: false
     conntrack: true
