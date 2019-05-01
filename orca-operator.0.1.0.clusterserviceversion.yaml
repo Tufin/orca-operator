@@ -149,21 +149,6 @@ spec:
                 image: registry.connect.redhat.com/tufin/orca-operator
                 imagePullPolicy: Always
                 name: orca-operator
-              - name: scorecard-proxy
-                command:
-                - scorecard-proxy
-                env:
-                - name: WATCH_NAMESPACE
-                  valueFrom:
-                    fieldRef:
-                      apiVersion: v1
-                      fieldPath: metadata.namespace
-                image: quay.io/operator-framework/scorecard-proxy:master
-                imagePullPolicy: Always
-                ports:
-                - name: proxy
-                  containerPort: 8889
-                resources: {}
               serviceAccountName: orca-operator
       permissions:
       - serviceAccountName: orca-operator
