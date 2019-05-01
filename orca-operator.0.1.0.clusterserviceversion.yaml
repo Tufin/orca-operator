@@ -13,19 +13,10 @@ metadata:
     createdAt: "2019-04-28T08:00:00Z"
     support: Tufin
 spec: 
+spec: 
   customresourcedefinitions: 
     owned: 
-      - kind: neil
-        name: neil.neil
-        version: v1alpha1
-        displayName: AquaCsp
-        description: Aqua Security CSP Deployment with Aqua Operator    
-      - kind: neil22
-        name: neil.neil222
-        version: nneeila122
-        displayName: neilllneilllsfsf
-        description: "Orca agent configuration"
-        
+      - description: "Orca agent configuration"
         displayName: Orca
         kind: Orca
         name: orcas.tufin.io
@@ -34,7 +25,7 @@ spec:
             version: apps/v1
           - kind: ReplicaSet
         specDescriptors: 
-          - description: "Your domain in Orca - typically the name of your organization"
+          - description: "Your domain in Orca - usually the name of your organization"
             displayName: domain
             path: domain
           - description: "Your project in Orca - a friendly name for your Kubernetes cluster"
