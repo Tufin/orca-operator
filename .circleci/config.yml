@@ -16,7 +16,7 @@ jobs:
       - run:
           name: Build operator
           command: |
-            operator-sdk build tufin/orca-operator --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
+            operator-sdk build tufin/orca-operator:latest --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
       - run:
           name: Validate artifacts
           command: |
@@ -31,14 +31,13 @@ jobs:
           name: Push to dockerhub
           command: |
             echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
-            docker tag tufin/orca-operator tufin/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
-            docker tag tufin/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM} tufin/orca-operator:latest
-            docker push tufin/orca-operator:latest
+            docker tag tufin/orca-operator:latest tufin/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
+            docker push tufin/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
       - run:
           name: Push to redhat registry
           command: |
             echo ${REDHAT_PASS} | docker login -u unused scan.connect.redhat.com --password-stdin
-            docker tag tufin/orca-operator scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
+            docker tag tufin/orca-operator:latest scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
             docker push scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
 
 workflows:
