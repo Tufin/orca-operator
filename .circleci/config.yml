@@ -26,6 +26,7 @@ jobs:
             docker cp orca-operator.0.1.0.clusterserviceversion.yaml configs:/artifacts
             docker cp orca.package.yaml configs:/artifacts
             docker cp deploy/crds/tufin_v1alpha1_orca_crd.yaml configs:/artifacts
+            docker cp deploy/crds/tufin_v1_policy_crd.yaml configs:/artifacts
             docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify /artifacts
       - run:
           name: Push to dockerhub
