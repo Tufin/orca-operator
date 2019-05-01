@@ -15,7 +15,17 @@ metadata:
 spec: 
   customresourcedefinitions: 
     owned: 
-      - description: "Orca agent configuration"
+      - kind: neil
+        name: neil.neil
+        version: v1alpha1
+        displayName: AquaCsp
+        description: Aqua Security CSP Deployment with Aqua Operator    
+      - kind: neil22
+        name: neil.neil222
+        version: nneeila122
+        displayName: neilllneilllsfsf
+        description: "Orca agent configuration"
+        
         displayName: Orca
         kind: Orca
         name: orcas.tufin.io
