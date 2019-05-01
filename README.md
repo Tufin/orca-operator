@@ -47,5 +47,5 @@ oc adm policy add-scc-to-user privileged -z conntrack -n tufin-system
 
 # Details
 https://github.com/operator-framework/operator-sdk
-https://github.com/operator-framework/operator-sdk/blob/master/doc/user-guide.md
+
 
