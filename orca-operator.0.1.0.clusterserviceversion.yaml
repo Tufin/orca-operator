@@ -37,12 +37,12 @@ metadata:
               "watcher": "true",
               "kube-network-policy": "true"
             },
-            "kube_platform": "Unknown"
+            "kube_platform": "OpenShift"
          }
       }]
     capabilities: Basic Install
     categories: Security Policy Management
-    description: Installs the resources in the cluster required by Orca, a cloud-based security monitoring and enforcement platform for Kubernetes clusters, containers and microservices.
+    description: Installs the required resources in the cluster to be managed by Orca - a cloud-based security monitoring and enforcement platform for Kubernetes.
     certified: "false"
     containerImage: registry.connect.redhat.com/tufin/orca-operator
     repository: https://github.com/Tufin/orca-operator
@@ -51,7 +51,7 @@ metadata:
 spec:
   customresourcedefinitions:
     owned:
-    - description: Orca agent configuration
+    - description: Orca Agent configuration
       displayName: Orca
       kind: Orca
       name: orcas.tufin.io
@@ -67,14 +67,14 @@ spec:
         displayName: project
         path: project
       version: v1alpha1
-      - description: "Orca Policy configuration"
-        displayName: Policy
-        kind: Policy
-        name: policies.networking.tufin.io
-        resources:
-          - kind: NetworkPolicy
-            version: networking.k8s.io/v1
-        version: v1
+    - description: Orca Policy configuration
+      displayName: Policy
+      kind: Policy
+      name: policies.networking.tufin.io
+      resources:
+        - kind: NetworkPolicy
+          version: networking.k8s.io/v1
+      version: v1
   description: "Tufin Orca is a cloud-based security monitoring and enforcement platform
     for Kubernetes clusters, containers and microservices.\n\nThe Orca Operator installs
     Orca resources into your cluster. These work with the Orca cloud application to give
@@ -85,8 +85,8 @@ spec:
     cluster and on enterpise firewalls surrounding the cluster\n* Integrate into the 
     CI/CD pipeline to learn and update the policy continuously\n* Scan images for 
     vulnerabilities\n## Deploying the agent\nThe agent requires a token to connect to 
-    the Orca service.\nTo get the token, 
-    [signup to Orca](https://www.tufin.com/products/tufin-orca#s6)"
+    the Orca service.\nTo get the token 
+    [follow the instructions here](https://www.tufin.com/products/tufin-orca#s6)."
   displayName: Tufin Orca Operator
   version: 0.1.0
   maturity: beta
@@ -146,7 +146,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: "orca-operator"
-                image: registry.connect.redhat.com/tufin/orca-operator:0.1.0.35
+                image: registry.connect.redhat.com/tufin/orca-operator
                 imagePullPolicy: Always
                 name: orca-operator
               - name: scorecard-proxy
