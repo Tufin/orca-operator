@@ -33,6 +33,7 @@ jobs:
             echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
             docker tag tufin/orca-operator:latest tufin/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
             docker push tufin/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
+            docker push tufin/orca-operator:latest
       - run:
           name: Push to redhat registry
           command: |
