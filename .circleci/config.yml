@@ -10,7 +10,7 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Generate code from orca_types.go 
+          name: Generate code from orca_types.go
           command: |
             operator-sdk generate k8s
       - run:
@@ -39,4 +39,12 @@ jobs:
             echo ${REDHAT_PASS} | docker login -u unused scan.connect.redhat.com --password-stdin
             docker tag tufin/orca-operator scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
             docker push scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
-            
+
+workflows:
+  version: 2
+  main:
+    jobs:
+    - build:
+        filters:
+          branches:
+            only: master
