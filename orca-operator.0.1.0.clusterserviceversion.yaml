@@ -84,9 +84,8 @@ spec:
     * Alert on unauthorized connections\n* Enforce the connectivity policy in the 
     cluster and on enterpise firewalls surrounding the cluster\n* Integrate into the 
     CI/CD pipeline to learn and update the policy continuously\n* Scan images for 
-    vulnerabilities\n## Deploying the agent\nThe agent requires a token to connect to 
-    the Orca service.\nTo get the token [follow the instructions here]
-    (https://forum.tufin.com/support/kc/R_Orca/Content/Topics/30-Getting_Started/OpenShiftOperator.htm)."
+    vulnerabilities\n## Deploying the agent\n[Sign up to Orca]
+    (https://www.tufin.com/products/tufin-orca#s6) and follow the instructions"
   displayName: Tufin Orca Operator
   version: 0.1.0
   maturity: beta
