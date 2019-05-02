@@ -42,7 +42,7 @@ metadata:
       }]
     capabilities: Basic Install
     categories: Security Policy Management
-    description: Installs the required resources in the cluster to be managed by Orca - a cloud-based security monitoring and enforcement platform for Kubernetes.
+    description: Installs the Orca Agent on the cluster. Orca is a cloud-based security monitoring and enforcement platform for Kubernetes.
     certified: "false"
     containerImage: registry.connect.redhat.com/tufin/orca-operator
     repository: https://github.com/Tufin/orca-operator
