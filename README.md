@@ -1,8 +1,9 @@
 # Orca Operator
-Kubernetes Operator for deploying Orca Agent (Kite etc.)
+Kubernetes Operator for deploying Tufin Orca Agent (Kite etc.)
 
 ## For Users
 ### Generating Orca's agent secret
+1. Sign up to Tufin Orca   https://www.tufin.com/products/tufin-orca#s6
 1. Get the agent's token (kite) from Orca's UI in the setting tab
 2. Get the domain & project names from the UI
 3. Run the following: 
