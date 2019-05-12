@@ -4,7 +4,7 @@ Kubernetes Operator for deploying Tufin Orca Agent (Kite etc.)
 ## For Users
 ### Generating Orca's agent secret
 1. Sign up to Tufin Orca   https://www.tufin.com/products/tufin-orca#s6
-2. You will receive an email containing your login details and also confirming operator parameters /<DOMAIN/> /<PROJECT/> /<AGENT_TOKEN/> 
+2. You will receive an email containing your login details and also confirming operator parameters \<DOMAIN\> \<PROJECT\> \AGENT_TOKEN\> 
 3. The operator parameters can be also found when logging into Orca: <DOMAIN> and <PROJECT> are displayed at the top of every Orca screen and <AGENT_TOKEN> can be found in Settings
 4. Run the following command: 
 ```bash
