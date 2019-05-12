@@ -4,9 +4,9 @@ Kubernetes Operator for deploying Tufin Orca Agent (Kite etc.)
 ## For Users
 ### Generating Orca's agent secret
 1. Sign up to Tufin Orca   https://www.tufin.com/products/tufin-orca#s6
-1. Get the agent's token (kite) from Orca's UI in the setting tab
-2. Get the domain & project names from the UI
-3. Run the following: 
+2. You'll receive an email containing your login details and also confirming operator parameters: <DOMAIN> <PROJECT> <AGENT_TOKEN> and optinally <NAMESPACE>
+3. The operator parameters can be also found when logging into Orca: <DOMAIN> and <PROJECT> are displayed at the top of every Orca screen and <AGENT_TOKEN> can be found in Settings
+4. Run the following command: 
 ```bash
 > ./generate_orca_secret.sh <DOMAIN> <PROJECT> <AGENT_TOKEN> [OPTIONAL NAMESPACE] > orca_secret.yaml
 > kubectl create -f orca_secret.yaml
