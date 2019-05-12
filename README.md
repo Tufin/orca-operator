@@ -5,10 +5,10 @@ Kubernetes Operator for deploying Tufin Orca Agent (Kite etc.)
 ### Generating Orca's agent secret
 1. Sign up to Tufin Orca   https://www.tufin.com/products/tufin-orca#s6
 2. You will receive an email containing your login details and also confirming operator parameters \<DOMAIN\>, \<PROJECT\>, \<AGENT_TOKEN\> and optionally \<OPTIONAL_NAMESPACE\>
-3. The operator parameters can be also found when logging into Orca: The domain and project are displayed at the top of every Orca screen and the agent token can be found in Settings
-4. Run the following command: 
+3. The operator parameters can be also found when logged in to Orca: The domain and project are displayed at the top of every Orca screen and the agent token can be found in Settings
+4. Run the command: 
 ```bash
-> ./generate_orca_secret.sh <DOMAIN> <PROJECT> <AGENT_TOKEN> <NAMESPACE> (if provided) > orca_secret.yaml
+> ./generate_orca_secret.sh <DOMAIN> <PROJECT> <AGENT_TOKEN> <OPTIONAL_NAMESPACE> (if provided) > orca_secret.yaml
 > kubectl create -f orca_secret.yaml
 ```
 ## For Developers
@@ -17,8 +17,6 @@ Run the following command - you can choose the namespace to deploy the operator 
 ```bash
 > ./install [OPTIONAL_NAMESPACE]
 ```
-
-
 
 ### Create the Orca CR
 Fill in the Domain, Project & Namespace - The agent will be installed in the provided namespace.
