@@ -5,26 +5,34 @@ jobs:
     docker:
       - image: tufinim/circleci-go:master
     environment:
-      RELEASE: 0.1.0
+      RELEASE: 0.1
     steps:
       - checkout
       - setup_remote_docker
       - run:
-          name: Generate code from orca_types.go
+          name: Generate code & CSV from orca_types.go
           command: |
             operator-sdk generate k8s
+            operator-sdk olm-catalog gen-csv --from-version ${RELEASE}.0 --csv-version ${RELEASE}.${CIRCLE_BUILD_NUM}
+#            TODO: create a pull request with the Operator catalog data only in the upstream-community-operators subdirectory
+      - store_artifacts:
+          path: deploy/olm-catalog/orca-operator
       - run:
           name: Build operator
           command: |
-            operator-sdk build tufin/orca-operator:latest --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
+            operator-sdk build tufin/orca-operator:latest --image-build-args "--build-arg version=${RELEASE}.${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
       - run:
           name: Validate artifacts
           command: |
             # create a dummy container which will hold a volume with config
             docker create -v /artifacts --name configs alpine:3.4 /bin/true
+
+            # inject version
+            sed "s/#VERSION#/${RELEASE}.${CIRCLE_BUILD_NUM}/g" orca.package.tmp.yaml > orca.package.yaml
+
             # copy artifact files into this volume
-            docker cp orca-operator.0.1.0.clusterserviceversion.yaml configs:/artifacts
             docker cp orca.package.yaml configs:/artifacts
+            docker cp deploy/olm-catalog/orca-operator/${RELEASE}.${CIRCLE_BUILD_NUM}/ configs:/artifacts
             docker cp deploy/crds/tufin_v1alpha1_orca_crd.yaml configs:/artifacts
             docker cp deploy/crds/tufin_v1_policy_crd.yaml configs:/artifacts
             docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify /artifacts
