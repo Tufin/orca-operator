@@ -20,7 +20,9 @@ jobs:
       - run:
           name: Build operator
           command: |
-            operator-sdk build tufin/orca-operator:latest --docker-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
+            operator-sdk build tufin/orca-operator:latest --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
+#            for v0.7.0+
+#            operator-sdk build tufin/orca-operator:latest --docker-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
       - run:
           name: Validate artifacts
           command: |
