@@ -30,13 +30,13 @@ jobs:
             docker create -v /artifacts --name configs alpine:3.4 /bin/true
 
             # inject version
-            sed "s/#VERSION#/${RELEASE}.${CIRCLE_BUILD_NUM}/g" orca.package.tmp.yaml > orca.package.yaml
+            sed "s/#VERSION#/${RELEASE}.${CIRCLE_BUILD_NUM}/g" orca-operator.package.tmp.yaml > orca-operator.package.yaml
 
             # copy artifact files into this volume
-            docker cp orca.package.yaml configs:/artifacts
+            docker cp orca-operator.package.yaml configs:/artifacts
             docker cp deploy/olm-catalog/orca-operator/${RELEASE}.${CIRCLE_BUILD_NUM}/ configs:/artifacts
-            docker cp deploy/crds/tufin_v1alpha1_orca_crd.yaml configs:/artifacts
-            docker cp deploy/crds/tufin_v1_policy_crd.yaml configs:/artifacts
+            docker cp deploy/crds/orca-operator-orca.crd.yaml configs:/artifacts
+            docker cp deploy/crds/orca-operator-policy.crd.yaml configs:/artifacts
             docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify /artifacts
       - run:
           name: Push to dockerhub
