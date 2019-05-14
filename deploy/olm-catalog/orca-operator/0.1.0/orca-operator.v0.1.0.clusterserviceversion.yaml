@@ -4,14 +4,15 @@ metadata:
   annotations:
     alm-examples: '[{"apiVersion":"tufin.io/v1alpha1","kind":"Orca","metadata":{"name":"orca"},"spec":{"components":{"conntrack":true,"dns":false,"istio":false,"kube-network-policy":true,"pusher":true,"syslog":false,"watcher":true},"domain":"generic-bank","endpoints":{"guru":"guru.tufin.io:443","orca":"https://orca.tufin.io","registry":"registry.tufin.io"},"ignored_config_maps":["kube-system/ingress-gce-lock","istio-system/istio-ingress-controller-leader-istio"],"images":{"conntrack":"registry.connect.redhat.com/tufin/conntrack","kite":"registry.connect.redhat.com/tufin/kite"},"kube_platform":"Openshift","namespace":"placeholder","project":"retail"}}]'
     capabilities: Basic Install
+    categories: Security Policy Management
+    description: Installs the Orca Agent on the cluster. Orca is a cloud-based security monitoring and enforcement platform for Kubernetes.
+    certified: "true"
+    containerImage: registry.connect.redhat.com/tufin/orca-operator
+    repository: https://github.com/Tufin/orca-operator
+    support: Tufin
+    createdAt: null
   name: orca-operator.v0.1.0
   namespace: placeholder
-  categories: Security Policy Management
-  description: Installs the Orca Agent on the cluster. Orca is a cloud-based security monitoring and enforcement platform for Kubernetes.
-  certified: "true"
-  containerImage: registry.connect.redhat.com/tufin/orca-operator
-  repository: https://github.com/Tufin/orca-operator
-  support: Tufin
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -41,7 +42,8 @@ spec:
       - description: Your project in Orca - a friendly name for your Kubernetes cluster
         displayName: project
         path: project
-  description: "Tufin Orca is a cloud-based security monitoring and enforcement platform
+  description: >-
+      Tufin Orca is a cloud-based security monitoring and enforcement platform
       for Kubernetes clusters, containers and microservices.\n\nThe Orca Operator installs
       Orca resources into your cluster. These work with the Orca cloud application to give
       the following functionality:\n* Monitor the cluster configuration: namespaces,
@@ -52,7 +54,7 @@ spec:
       CI/CD pipeline to learn and update the policy continuously\n* Scan images for
       vulnerabilities\n## Deploying the agent\n* Sign up to Orca [here] (https://www.tufin.com/products/tufin-orca#s6) \n\n*
       You will be sent an email containing your deployment parameters\n\n* Complete the deployment following the instructions [here]
-      (https://github.com/Tufin/orca-operator/blob/master/README.md)"
+      (https://github.com/Tufin/orca-operator/blob/master/README.md)
   displayName: Tufin Orca Operator
   maturity: beta
   keywords:
