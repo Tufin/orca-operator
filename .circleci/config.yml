@@ -13,7 +13,7 @@ jobs:
           name: Generate code & CSV from orca_types.go
           command: |
             operator-sdk generate k8s
-            operator-sdk olm-catalog gen-csv --from-version ${RELEASE}.0 --csv-version ${RELEASE}.${CIRCLE_BUILD_NUM}
+            operator-sdk olm-catalog gen-csv --update-crds --from-version ${RELEASE}.0 --csv-version ${RELEASE}.${CIRCLE_BUILD_NUM}
 #            TODO: create a pull request with the Operator catalog data only in the upstream-community-operators subdirectory
       - store_artifacts:
           path: deploy/olm-catalog/orca-operator
@@ -30,13 +30,13 @@ jobs:
             docker create -v /artifacts --name configs alpine:3.4 /bin/true
 
             # inject version
-            sed "s/#VERSION#/${RELEASE}.${CIRCLE_BUILD_NUM}/g" orca-operator.package.tmp.yaml > orca-operator.package.yaml
+            sed "s/#VERSION#/${RELEASE}.${CIRCLE_BUILD_NUM}/g" deploy/olm-catalog/orca-operator.package.tmp.yaml > orca-operator.package.yaml
 
             # copy artifact files into this volume
             docker cp orca-operator.package.yaml configs:/artifacts
             docker cp deploy/olm-catalog/orca-operator/${RELEASE}.${CIRCLE_BUILD_NUM}/ configs:/artifacts
-            docker cp deploy/crds/orca-operator-orca.crd.yaml configs:/artifacts
-            docker cp deploy/crds/orca-operator-policy.crd.yaml configs:/artifacts
+#            docker cp deploy/crds/orca-operator-orca.crd.yaml configs:/artifacts
+#            docker cp deploy/crds/orca-operator-policy.crd.yaml configs:/artifacts
             docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify /artifacts
       - run:
           name: Push to dockerhub
