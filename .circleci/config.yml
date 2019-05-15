@@ -34,6 +34,7 @@ jobs:
             ${BUNDLE_DIR}/orca-operator.package.yaml
 
             # copy artifact files into this volume
+            docker cp ${BUNDLE_DIR}/orca-operator.package.yaml configs:/artifacts
             docker cp ${BUNDLE_DIR}/ configs:/artifacts
             docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify /artifacts
 
