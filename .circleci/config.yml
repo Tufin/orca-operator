@@ -35,8 +35,6 @@ jobs:
             # copy artifact files into this volume
             docker cp orca-operator.package.yaml configs:/artifacts
             docker cp deploy/olm-catalog/orca-operator/${RELEASE}.${CIRCLE_BUILD_NUM}/ configs:/artifacts
-#            docker cp deploy/crds/orca-operator-orca.crd.yaml configs:/artifacts
-#            docker cp deploy/crds/orca-operator-policy.crd.yaml configs:/artifacts
             docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify /artifacts
       - run:
           name: Push to dockerhub
