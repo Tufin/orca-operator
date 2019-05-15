@@ -15,8 +15,6 @@ jobs:
             operator-sdk generate k8s
             operator-sdk olm-catalog gen-csv --update-crds --from-version ${RELEASE}.0 --csv-version ${RELEASE}.${CIRCLE_BUILD_NUM}
 #            TODO: create a pull request with the Operator catalog data only in the upstream-community-operators subdirectory
-      - store_artifacts:
-          path: deploy/olm-catalog/orca-operator
       - run:
           name: Build operator
           command: |
@@ -26,16 +24,23 @@ jobs:
       - run:
           name: Validate artifacts
           command: |
+            BUNDLE_VER=${RELEASE}.${CIRCLE_BUILD_NUM}
+            BUNDLE_DIR=deploy/olm-catalog/orca-operator/${BUNDLE_VER}
             # create a dummy container which will hold a volume with config
             docker create -v /artifacts --name configs alpine:3.4 /bin/true
 
             # inject version
-            sed "s/#VERSION#/${RELEASE}.${CIRCLE_BUILD_NUM}/g" deploy/olm-catalog/orca-operator.package.tmp.yaml > orca-operator.package.yaml
+            sed "s/#VERSION#/${BUNDLE_VER}/g" deploy/olm-catalog/orca-operator.package.tmp.yaml > \
+            ${BUNDLE_DIR}/orca-operator.package.yaml
 
             # copy artifact files into this volume
-            docker cp orca-operator.package.yaml configs:/artifacts
-            docker cp deploy/olm-catalog/orca-operator/${RELEASE}.${CIRCLE_BUILD_NUM}/ configs:/artifacts
+            docker cp ${BUNDLE_DIR}/ configs:/artifacts
             docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify /artifacts
+
+            # create bundle artifacts archive
+            zip ${BUNDLE_DIR}/orca-operator-v${BUNDLE_VER}.zip ${BUNDLE_DIR}/*
+      - store_artifacts:
+          path: deploy/olm-catalog/orca-operator
       - run:
           name: Push to dockerhub
           command: |
