@@ -30,15 +30,15 @@ jobs:
             docker create -v /artifacts --name configs alpine:3.4 /bin/true
 
             # inject version
-            sed "s/#VERSION#/${BUNDLE_VER}/g" deploy/olm-catalog/orca-operator.package.tmp.yaml > \
-            ${BUNDLE_DIR}/orca-operator.package.yaml
+            sed "s/#VERSION#/${BUNDLE_VER}/g" deploy/olm-catalog/orca-operator.package.tmp.yaml > orca-operator.package.yaml
 
             # copy artifact files into this volume
-            docker cp ${BUNDLE_DIR}/orca-operator.package.yaml configs:/artifacts
+            docker cp orca-operator.package.yaml configs:/artifacts
             docker cp ${BUNDLE_DIR}/ configs:/artifacts
             docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify /artifacts
 
             # create bundle artifacts archive
+            cp orca-operator.package.yaml ${BUNDLE_DIR}/orca-operator.package.yaml
             zip ${BUNDLE_DIR}/orca-operator-v${BUNDLE_VER}.zip ${BUNDLE_DIR}/*
       - store_artifacts:
           path: deploy/olm-catalog/orca-operator
