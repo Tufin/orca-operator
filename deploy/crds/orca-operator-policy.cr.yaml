@@ -1,0 +1,9 @@
+apiVersion: networking.tufin.io/v1
+kind: Policy
+metadata:
+  name: orca
+  namespace: placeholder
+spec:
+  mode: learning
+  networkPolicyAllowAll: true
+  rules: []
