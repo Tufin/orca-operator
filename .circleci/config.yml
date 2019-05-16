@@ -45,6 +45,11 @@ jobs:
       - run:
           name: Push to dockerhub
           command: |
+            if [[ "$TUFIN_PUBLISH_DOCKERHUB" != "true" ]]; then
+              echo "Not pushing to docker-hub"
+              exit 0
+            fi
+
             echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
             docker tag tufin/orca-operator:latest tufin/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
             docker push tufin/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
@@ -52,6 +57,11 @@ jobs:
       - run:
           name: Push to redhat registry
           command: |
+            if [[ "$TUFIN_PUBLISH_REDHAT" != "true" ]]; then
+              echo "Not pushing to red-hat (OLM)"
+              exit 0
+            fi
+
             echo ${REDHAT_PASS} | docker login -u unused scan.connect.redhat.com --password-stdin
             docker tag tufin/orca-operator:latest scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
             docker push scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}

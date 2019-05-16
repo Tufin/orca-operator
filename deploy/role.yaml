@@ -129,6 +129,16 @@ rules:
   - get
   - list
   - watch
+- verbs:
+  - use
+  apiGroups:
+  - security.openshift.io
+  resources:
+  - securitycontextconstraints
+  resourceNames:
+  - hostaccess
+  - hostnetwork
+  - node-exporter
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -198,3 +208,11 @@ rules:
     - get
     - list
     - watch
+- verbs:
+  - use
+  apiGroups:
+  - security.openshift.io
+  resources:
+  - securitycontextconstraints
+  resourceNames:
+  - privileged

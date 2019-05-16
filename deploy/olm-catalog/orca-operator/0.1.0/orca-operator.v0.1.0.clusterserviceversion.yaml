@@ -194,6 +194,16 @@ spec:
           - get
           - list
           - watch
+        - apiGroups:
+          - security.openshift.io
+          resourceNames:
+          - hostaccess
+          - hostnetwork
+          - node-exporter
+          resources:
+          - securitycontextconstraints
+          verbs:
+          - use
         serviceAccountName: kite
       - rules:
         - apiGroups:
@@ -259,6 +269,14 @@ spec:
           - get
           - list
           - watch
+        - apiGroups:
+          - security.openshift.io
+          resourceNames:
+          - privileged
+          resources:
+          - securitycontextconstraints
+          verbs:
+          - use
         serviceAccountName: conntrack
       deployments:
       - name: orca-operator
