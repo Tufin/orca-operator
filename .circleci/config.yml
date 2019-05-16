@@ -35,7 +35,9 @@ jobs:
             # copy artifact files into this volume
             docker cp orca-operator.package.yaml configs:/artifacts
             docker cp ${BUNDLE_DIR}/ configs:/artifacts
+
             docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify /artifacts
+            docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify --ui_validate_io /artifacts
 
             # create bundle artifacts archive
             cp orca-operator.package.yaml ${BUNDLE_DIR}/orca-operator.package.yaml
@@ -45,6 +47,10 @@ jobs:
       - run:
           name: Push to dockerhub
           command: |
+            if [[ $(git log -1 --pretty=%B) == *"[push docker]"*]]; then
+              TUFIN_PUBLISH_DOCKERHUB="true"
+            fi
+
             if [[ "$TUFIN_PUBLISH_DOCKERHUB" != "true" ]]; then
               echo "Not pushing to docker-hub"
               exit 0
@@ -57,6 +63,10 @@ jobs:
       - run:
           name: Push to redhat registry
           command: |
+            if [[ $(git log -1 --pretty=%B) == *"[push redhat]"*]]; then
+              TUFIN_PUBLISH_REDHAT="true"
+            fi
+
             if [[ "$TUFIN_PUBLISH_REDHAT" != "true" ]]; then
               echo "Not pushing to red-hat (OLM)"
               exit 0
