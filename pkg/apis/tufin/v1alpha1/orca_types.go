@@ -33,7 +33,7 @@ type OrcaStatus struct {
 	// Add custom validation using kubebuilder tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html
 
 	// +kubebuilder:validation:Enum=Ready,Creating,Failed,Unknown,Updated
-	Ready string
+	Phase string `json:"phase,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -8,11 +8,13 @@ import (
 )
 
 const (
-	app          = "app"
-	name         = "name"
-	kite         = "kite"
-	conntrack    = "conntrack"
-	orcaOperator = "orca-operator"
+	app        = "app"
+	name       = "name"
+	kite       = "kite"
+	conntrack  = "conntrack"
+	tufinDNS   = "tufindns"
+	kubeDNS    = "kube-dns"
+	kubeSystem = "kube-system"
 
 	dockerSocketVolumeName     = "docker-socket"
 	dockerSocketVolumePath     = "/var/run/docker.sock"
@@ -85,6 +87,21 @@ func GetHostVolume(name string, path string, volType corev1.HostPathType) corev1
 		Name: name,
 		VolumeSource: corev1.VolumeSource{
 			HostPath: &corev1.HostPathVolumeSource{Path: path, Type: &volType},
+		},
+	}
+}
+
+func GetConfigMapVolume(volName string, configName string, items ... corev1.KeyToPath) corev1.Volume {
+
+	return corev1.Volume{
+		Name: volName,
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: configName,
+				},
+				Items: items,
+			},
 		},
 	}
 }
