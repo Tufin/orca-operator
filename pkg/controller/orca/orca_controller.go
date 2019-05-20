@@ -22,6 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 	"fmt"
 	"reflect"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 var log = logf.Log.WithName("controller_orca")
@@ -47,6 +48,7 @@ type ClusterAPI struct {
 	RBAC          bool
 	Istio         bool
 	NetworkPolicy bool
+	KubeDNS       bool
 	Provider      string
 }
 
@@ -150,11 +152,29 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 	kiteService := getKiteService(instance)
 	conntrackDaemonset := getConntrackDaemonset(instance)
 
+	instance.Status.Phase = StatusCreating
+
 	reconcileResult, err := r.createResourceArray(instance,
 		ResourceRequest{Required: kiteDeployment, RequiredStruct: &appsv1.Deployment{}},
 		ResourceRequest{Required: kiteService, RequiredStruct: &corev1.Service{}},
 		ResourceRequest{Required: conntrackDaemonset, RequiredStruct: &appsv1.DaemonSet{}},
 	)
+
+	if err != nil {
+		r.UpdateStatus(instance, StatusFailed)
+
+		return reconcileResult, err
+	} else if apis.KubeDNS {
+		reconcileResult, err = r.updateKubeDNSDeploy(instance)
+
+		if err != nil {
+			r.UpdateStatus(instance, StatusFailed)
+		} else if reconcileResult, err = r.createResource(instance, getTufinDNSConfigMap(instance, 53), &appsv1.Deployment{}); err != nil {
+			r.UpdateStatus(instance, StatusFailed)
+		}
+	}
+
+	r.UpdateStatus(instance, metav1.StatusSuccess)
 
 	reqLogger.Info("Orca was successfully deployed in the cluster!")
 	return reconcileResult, nil
@@ -164,17 +184,13 @@ func (r *ReconcileOrca) createResourceArray(instance *appv1alpha1.Orca, resource
 
 	var reconcileResult reconcile.Result
 	var err error
-	instance.Status.Phase = StatusCreating
 
 	for _, resourceRequest := range resources {
 		reconcileResult, err = r.createResource(instance, resourceRequest.Required, resourceRequest.RequiredStruct)
 		if err != nil {
-			r.UpdateStatus(instance, StatusFailed)
 			return reconcileResult, err
 		}
 	}
-
-	r.UpdateStatus(instance, StatusReady)
 
 	return reconcile.Result{}, nil
 }
@@ -242,63 +258,99 @@ func (r *ReconcileOrca) createResource(instance *appv1alpha1.Orca, required meta
 	return reconcile.Result{}, nil
 }
 
-//func (r *ReconcileOrca) injectTufinIntoKubeDNS(instance *appv1alpha1.Orca, required metav1.Object, requiredStruct runtime.Object) (reconcile.Result, error) {
-//
-//	reqLogger := log.WithValues("Kind", fmt.Sprintf("%T", requiredStruct), "Namespace", required.GetNamespace(), "Resource Name", required.GetName())
-//	ns := required.GetNamespace()
-//
-//	if instance.Status.Phase != StatusCreating {
-//		return reconcile.Result{}, nil
-//	}
-//
-//	if err := controllerutil.SetControllerReference(instance, required, r.scheme); err != nil {
-//		reqLogger.Error(err, "Failed to set the operator as the resource owner")
-//		return reconcile.Result{}, err
-//	}
-//
-//	err := r.client.Get(context.TODO(), types.NamespacedName{Name: required.GetName(), Namespace: ns}, requiredStruct)
-//	if err != nil && errors.IsNotFound(err) {
-//		reqLogger.Info("Creating Resource...")
-//		err = r.client.Create(context.TODO(), required.(runtime.Object))
-//		if err != nil {
-//			reqLogger.Error(err, "Resource creation failed")
-//			return reconcile.Result{}, err
-//		}
-//
-//		reqLogger.Info("Resource created successfully")
-//		return reconcile.Result{}, nil
-//	} else if err != nil {
-//
-//		return reconcile.Result{}, err
-//	} else {
-//		reqLogger.Info("Resource already exists, trying to update...")
-//
-//		if reflect.DeepEqual(required, requiredStruct.(metav1.Object)) {
-//			reqLogger.Info("Resource is already up to date")
-//			return reconcile.Result{}, nil
-//		}
-//
-//		err = r.client.Delete(context.TODO(), requiredStruct)
-//		if err != nil {
-//			reqLogger.Error(err, "Resource update failed, deletion failed")
-//			return reconcile.Result{}, err
-//		}
-//		err = r.client.Create(context.TODO(), required.(runtime.Object))
-//		if err != nil {
-//			reqLogger.Error(err, "Resource update failed, creation failed")
-//			return reconcile.Result{}, err
-//		}
-//
-//		reqLogger.Info("Resource update succeeded")
-//	}
-//
-//	return reconcile.Result{}, nil
-//}
+func (r *ReconcileOrca) updateKubeDNSDeploy(instance *appv1alpha1.Orca) (reconcile.Result, error) {
+
+	reqLogger := log.WithValues("Kind", "Deployment", "Namespace", kubeSystem, "Resource Name", kubeDNS)
+
+	if instance.Status.Phase != StatusCreating {
+		return reconcile.Result{}, nil
+	}
+
+	required := getTufinDNSDeployment(instance, 53)
+	found := &appsv1.Deployment{}
+
+	if err := controllerutil.SetControllerReference(instance, required, r.scheme); err != nil {
+		reqLogger.Error(err, "Failed to set the operator as the resource owner")
+		return reconcile.Result{}, err
+	}
+
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: required.GetName(), Namespace: required.Namespace}, found)
+	if err != nil && errors.IsNotFound(err) {
+		reqLogger.Info("Not found in cluster - skipping TufinDNS injection.")
+
+		return reconcile.Result{}, nil
+	} else if err != nil {
+
+		return reconcile.Result{}, err
+	} else {
+		reqLogger.Info("Resource already exists, trying to update...")
+
+		found.Spec.Template.Spec.Containers = append(found.Spec.Template.Spec.Containers, required.Spec.Template.Spec.Containers...)
+		found.Spec.Template.Spec.Volumes = append(found.Spec.Template.Spec.Volumes, required.Spec.Template.Spec.Volumes...)
+
+		err = r.client.Update(context.TODO(), found)
+		if err != nil {
+			reqLogger.Error(err, "Resource update failed")
+			return reconcile.Result{}, err
+		}
+
+		reqLogger.Info("Resource update succeeded")
+	}
+
+	return r.updateKubeDNSService(instance, 53)
+
+	//return reconcile.Result{}, nil
+}
+
+func (r *ReconcileOrca) updateKubeDNSService(instance *appv1alpha1.Orca, dnsPort int32) (reconcile.Result, error) {
+
+	reqLogger := log.WithValues("Kind", "Service", "Namespace", kubeSystem, "Resource Name", kubeDNS)
+
+	found := &corev1.Service{}
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: kubeDNS, Namespace: kubeSystem}, found)
+	if err != nil && errors.IsNotFound(err) {
+		return reconcile.Result{}, nil
+	}
+
+	for i, port := range found.Spec.Ports {
+		if port.Name == "dns" && port.Protocol == corev1.ProtocolUDP && port.Port == 53 {
+			found.Spec.Ports[i].TargetPort = intstr.IntOrString{
+				IntVal: dnsPort,
+			}
+
+			break
+		}
+	}
+
+	err = r.client.Update(context.TODO(), found)
+	if err != nil {
+		reqLogger.Error(err, "Resource update failed")
+		return reconcile.Result{}, err
+	}
+
+	reqLogger.Info("Resource update succeeded")
+	return reconcile.Result{}, nil
+}
 
 func (r *ReconcileOrca) checkAvailableAPI(apiGroup string) bool {
 
 	ret := r.scheme.IsGroupRegistered(apiGroup)
 	log.Info("API group", apiGroup, ret)
+
+	return ret
+}
+
+func (r *ReconcileOrca) checkKubeDNSInCluster() bool {
+
+	ret := true
+
+	var found corev1.Service
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: kubeDNS, Namespace: kubeSystem}, &found)
+	if err != nil && errors.IsNotFound(err) {
+		ret = false
+		log.Error(err, "KubeDNS not found!")
+	}
+	log.Info("KubeDNS ()", "Found in cluster", ret)
 
 	return ret
 }
@@ -309,6 +361,7 @@ func (r *ReconcileOrca) getAvailableClusterAPIs() ClusterAPI {
 		RBAC:          r.checkAvailableAPI(ApiGroupRBAC),
 		Istio:         r.checkAvailableAPI(ApiGroupIstio),
 		NetworkPolicy: r.checkAvailableAPI(ApiGroupNetworking),
+		KubeDNS:       r.checkKubeDNSInCluster(),
 		Provider:      "",
 	}
 }
