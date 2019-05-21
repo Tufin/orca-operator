@@ -75,7 +75,7 @@ jobs:
             git config --global user.name "reuvenharrison"
 
             git add ${BUNDLE_DIR}/${LATEST_VER}
-            git commit -m "New CSV generated 'LATEST_VER' [skip ci]"
+            git commit -m "New CSV generated '$LATEST_VER' [skip ci]"
             git push -q https://${GITHUB_TOKEN}@github.com/Tufin/orca-operator.git ${CIRCLE_BRANCH}
       - run:
           name: Push to dockerhub
