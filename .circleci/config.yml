@@ -16,16 +16,16 @@ jobs:
       - run:
           name: Build operator
           command: |
+            echo "export BUNDLE_DIR=deploy/olm-catalog/orca-operator" >> $BASH_ENV
+            echo "export LATEST_VER=$(ls ${BUNDLE_DIR} | sort | tail -n1)" >> $BASH_ENV
+            echo "export BUNDLE_VER=${LATEST_VER%.*}.${CIRCLE_BUILD_NUM}" >> $BASH_ENV
+
             operator-sdk build tufin/orca-operator:latest --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
 #            for v0.7.0+
 #            operator-sdk build tufin/orca-operator:latest --docker-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
       - run:
           name: Generate & Validate CSV artifacts
           command: |
-            BUNDLE_DIR=deploy/olm-catalog/orca-operator
-            LATEST_VER=$(ls ${BUNDLE_DIR} | sort | tail -n1)
-            BUNDLE_VER=${LATEST_VER%.*}.${CIRCLE_BUILD_NUM}
-
             operator-sdk olm-catalog gen-csv --update-crds --from-version ${LATEST_VER} --csv-version ${BUNDLE_VER}
             # TODO: create a pull request with the Operator catalog data only in the upstream-community-operators subdirectory
 
@@ -64,18 +64,12 @@ jobs:
               exit 0
             fi
 
-            BUNDLE_DIR=deploy/olm-catalog/orca-operator
-
-            rm -rf ${BUNDLE_DIR}/redhat
-
-            LATEST_VER=$(ls ${BUNDLE_DIR} | sort | tail -n1)
-
             git config credential.helper 'cache --timeout=120'
             git config --global user.email "rh@tufin.com"
             git config --global user.name "reuvenharrison"
 
-            git add ${BUNDLE_DIR}/${LATEST_VER}
-            git commit -m "New CSV generated '$LATEST_VER' [skip ci]"
+            git add ${BUNDLE_DIR}/${BUNDLE_VER}
+            git commit -m "New CSV generated '${BUNDLE_VER}' [skip ci]"
             git push -q https://${GITHUB_TOKEN}@github.com/Tufin/orca-operator.git ${CIRCLE_BRANCH}
       - run:
           name: Push to dockerhub
@@ -90,8 +84,8 @@ jobs:
             fi
 
             echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
-            docker tag tufin/orca-operator:latest tufin/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
-            docker push tufin/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
+            docker tag tufin/orca-operator:latest tufin/orca-operator:${BUNDLE_VER}
+            docker push tufin/orca-operator:${BUNDLE_VER}
             docker push tufin/orca-operator:latest
       - run:
           name: Push to redhat registry
@@ -106,8 +100,8 @@ jobs:
             fi
 
             echo ${REDHAT_PASS} | docker login -u unused scan.connect.redhat.com --password-stdin
-            docker tag tufin/orca-operator:latest scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
-            docker push scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${RELEASE}.${CIRCLE_BUILD_NUM}
+            docker tag tufin/orca-operator:latest scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${BUNDLE_VER}
+            docker push scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${BUNDLE_VER}
 
 workflows:
   version: 2
