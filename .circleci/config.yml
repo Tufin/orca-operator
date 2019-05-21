@@ -33,14 +33,12 @@ jobs:
             sed "s/#VERSION#/${BUNDLE_VER}/g" deploy/olm-catalog/orca-operator.package.tmp.yaml > ${BUNDLE_DIR}/orca-operator.package.yaml
 
             # copy artifact files into this volume
-            # docker cp orca-operator.package.yaml configs:/artifacts
             docker cp ${BUNDLE_DIR}/ configs:/artifacts
 
-            docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify /artifacts
-            docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify --ui_validate_io /artifacts
+            docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify /artifacts/orca-operator
+            docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify --ui_validate_io /artifacts/orca-operator
 
             # create bundle artifacts archive
-            cp orca-operator.package.yaml ${BUNDLE_DIR}/orca-operator.package.yaml
             cd ${BUNDLE_DIR}
             zip -r orca-operator-v${BUNDLE_VER}.zip ./*
       - store_artifacts:
