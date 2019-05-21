@@ -1,4 +1,0 @@
-packageName: orca
-channels:
-- name: beta
-  currentCSV: orca-operator.v0.1.95
