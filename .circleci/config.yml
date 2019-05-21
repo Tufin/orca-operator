@@ -40,7 +40,13 @@ jobs:
 
             # create bundle artifacts archive
             cd ${BUNDLE_DIR}
-            zip -r orca-operator-v${BUNDLE_VER}.zip ./*
+            zip -r orca-operator-v${BUNDLE_VER}-community.zip ./*
+
+            mkdir redhat
+            for f in $(find ./ -type f -name "*.yaml"); do cp $f redhat/; done
+
+            cd redhat
+            zip -r orca-operator-v${BUNDLE_VER}-redhat.zip ./*
       - store_artifacts:
           path: deploy/olm-catalog/orca-operator
       - run:
