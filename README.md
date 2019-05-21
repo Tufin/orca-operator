@@ -1,4 +1,6 @@
-# orca-operator
+# orca-operator 
+[![CircleCI](https://circleci.com/gh/Tufin/orca-operator/tree/master.svg?style=svg)](https://circleci.com/gh/Tufin/orca-operator/tree/master)
+
 Kubernetes Operator for deploying Orca Agent (Kite etc.)
 
 
