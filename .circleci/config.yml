@@ -41,7 +41,7 @@ jobs:
 
             # create bundle artifacts archive
             cp orca-operator.package.yaml ${BUNDLE_DIR}/orca-operator.package.yaml
-            zip -jr ${BUNDLE_DIR}/orca-operator-v${BUNDLE_VER}.zip ${BUNDLE_DIR}/*
+            zip -r ${BUNDLE_DIR}/orca-operator-v${BUNDLE_VER}.zip ${BUNDLE_DIR}/*
       - store_artifacts:
           path: deploy/olm-catalog/orca-operator
       - run:
