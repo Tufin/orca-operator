@@ -25,7 +25,7 @@ jobs:
           name: Validate artifacts
           command: |
             BUNDLE_VER=${RELEASE}.${CIRCLE_BUILD_NUM}
-            BUNDLE_DIR=deploy/olm-catalog/orca-operator/${BUNDLE_VER}
+            BUNDLE_DIR=deploy/olm-catalog/orca-operator
             # create a dummy container which will hold a volume with config
             docker create -v /artifacts --name configs alpine:3.4 /bin/true
 
@@ -34,7 +34,7 @@ jobs:
 
             # copy artifact files into this volume
             docker cp orca-operator.package.yaml configs:/artifacts
-            docker cp ${BUNDLE_DIR}/ configs:/artifacts
+            docker cp ${BUNDLE_DIR}/${BUNDLE_VER}/ configs:/artifacts
 
             docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify /artifacts
             docker run --volumes-from configs tufin/operator-courier operator-courier --verbose verify --ui_validate_io /artifacts
