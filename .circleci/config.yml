@@ -56,25 +56,6 @@ jobs:
       - store_artifacts:
           path: deploy/olm-catalog/orca-operator
       - run:
-          name: Push CSV to github
-          command: |
-            if [[ $(git log -1 --pretty=%B) == *"[push csv]"* ]]; then
-              TUFIN_PUSH_CSV_TO_GITHUB="true"
-            fi
-
-            if [[ "$TUFIN_PUSH_CSV_TO_GITHUB" != "true" ]]; then
-              echo "Not pushing to new CSV to github"
-              exit 0
-            fi
-
-            git config credential.helper 'cache --timeout=120'
-            git config --global user.email "rh@tufin.com"
-            git config --global user.name "reuvenharrison"
-
-            git add ${LATEST_DIR}
-            git commit -m "New CSV generated '${BUNDLE_VER}' [skip ci]"
-            git push -q https://${GITHUB_TOKEN}@github.com/Tufin/orca-operator.git ${CIRCLE_BRANCH}
-      - run:
           name: Push to dockerhub
           command: |
             if [[ $(git log -1 --pretty=%B) == *"[push docker]"* ]]; then
@@ -105,7 +86,25 @@ jobs:
             echo ${REDHAT_PASS} | docker login -u unused scan.connect.redhat.com --password-stdin
             docker tag tufin/orca-operator:latest scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${BUNDLE_VER}
             docker push scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${BUNDLE_VER}
+      - run:
+          name: Push CSV to github
+          command: |
+            if [[ $(git log -1 --pretty=%B) == *"[push csv]"* ]]; then
+              TUFIN_PUSH_CSV_TO_GITHUB="true"
+            fi
 
+            if [[ "$TUFIN_PUSH_CSV_TO_GITHUB" != "true" ]]; then
+              echo "Not pushing to new CSV to github"
+              exit 0
+            fi
+
+            git config credential.helper 'cache --timeout=120'
+            git config --global user.email "rh@tufin.com"
+            git config --global user.name "reuvenharrison"
+
+            git add ${LATEST_DIR}
+            git commit -m "New CSV generated '${BUNDLE_VER}' [skip ci]"
+            git push -q https://${GITHUB_TOKEN}@github.com/Tufin/orca-operator.git ${CIRCLE_BRANCH}
 workflows:
   version: 2
   main:
