@@ -302,7 +302,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: orca-operator
-                image: docker.io/tufin/orca-operator:latest
+                image: registry.connect.redhat.com/tufin/orca-operator
                 imagePullPolicy: Always
                 name: orca-operator
                 resources: {}

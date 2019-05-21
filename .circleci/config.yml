@@ -10,11 +10,9 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Generate code & CSV from orca_types.go
+          name: Generate code from orca_types.go
           command: |
             operator-sdk generate k8s
-            operator-sdk olm-catalog gen-csv --update-crds --from-version ${RELEASE}.0 --csv-version ${RELEASE}.${CIRCLE_BUILD_NUM}
-#            TODO: create a pull request with the Operator catalog data only in the upstream-community-operators subdirectory
       - run:
           name: Build operator
           command: |
@@ -22,10 +20,15 @@ jobs:
 #            for v0.7.0+
 #            operator-sdk build tufin/orca-operator:latest --docker-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
       - run:
-          name: Validate artifacts
+          name: Generate & Validate CSV artifacts
           command: |
-            BUNDLE_VER=${RELEASE}.${CIRCLE_BUILD_NUM}
             BUNDLE_DIR=deploy/olm-catalog/orca-operator
+            LATEST_VER=$(ls ${BUNDLE_DIR} | sort | tail -n1)
+            BUNDLE_VER=${LATEST_VER%.*}.${CIRCLE_BUILD_NUM}
+
+            operator-sdk olm-catalog gen-csv --update-crds --from-version ${LATEST_VER} --csv-version ${BUNDLE_VER}
+            # TODO: create a pull request with the Operator catalog data only in the upstream-community-operators subdirectory
+
             # create a dummy container which will hold a volume with config
             docker create -v /artifacts --name configs alpine:3.4 /bin/true
 
@@ -49,6 +52,24 @@ jobs:
             zip -r orca-operator-v${BUNDLE_VER}-redhat.zip ./*
       - store_artifacts:
           path: deploy/olm-catalog/orca-operator
+      - run:
+          name: Push CSV to github
+          command: |
+            if [[ $(git log -1 --pretty=%B) == *"[push csv]"* ]]; then
+              TUFIN_PUSH_CSV_TO_GITHUB="true"
+            fi
+
+            if [[ "$TUFIN_PUSH_CSV_TO_GITHUB" != "true" ]]; then
+              echo "Not pushing to new CSV to github"
+              exit 0
+            fi
+
+            BUNDLE_DIR=deploy/olm-catalog/orca-operator
+            LATEST_VER=$(ls ${BUNDLE_DIR} | sort | tail -n1)
+
+            git add ${BUNDLE_DIR}/${LATEST_VER}
+            git commit -m "New CSV generated 'LATEST_VER' [skip ci]"
+            git push -q https://${GITHUB_TOKEN}@github.com/Tufin/orca-operator.git ${CIRCLE_BRANCH}
       - run:
           name: Push to dockerhub
           command: |
