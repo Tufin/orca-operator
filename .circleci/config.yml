@@ -17,7 +17,8 @@ jobs:
           name: Build operator
           command: |
             echo 'export BUNDLE_DIR="deploy/olm-catalog/orca-operator"' >> $BASH_ENV
-            echo 'export LATEST_VER="$(ls ${BUNDLE_DIR} | sort | tail -n1)"' >> $BASH_ENV
+            echo 'export LATEST_DIR="$(find ${BUNDLE_DIR} -type d -name 0* | sort | tail -n1)"' >> $BASH_ENV
+            echo 'export LATEST_VER="${LATEST_DIR##*/}"' >> $BASH_ENV
             echo 'export BUNDLE_VER="${LATEST_VER%.*}.${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
 
             source $BASH_ENV
@@ -70,7 +71,7 @@ jobs:
             git config --global user.email "rh@tufin.com"
             git config --global user.name "reuvenharrison"
 
-            git add ${BUNDLE_DIR}/${BUNDLE_VER}
+            git add ${LATEST_DIR}
             git commit -m "New CSV generated '${BUNDLE_VER}' [skip ci]"
             git push -q https://${GITHUB_TOKEN}@github.com/Tufin/orca-operator.git ${CIRCLE_BRANCH}
       - run:
