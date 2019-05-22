@@ -26,6 +26,7 @@ jobs:
 
             # shared functions
             echo 'export CHECK_COMMIT_MSG="$([[ $(git log -1 --pretty=%B) == *"[${TAG_PREFIX}"*" ${TAG_ACTION}"*"]" ]] && echo true)"' >> $BASH_ENV
+            echo 'export TEMP_CHECK_RES="$([[ ${!TAG_SET_ENV} -z ]] && declare ${!TAG_SET_ENV}=${CHECK_COMMIT_MSG})"' >> $BASH_ENV
 
             source $BASH_ENV
       - run:
@@ -126,6 +127,17 @@ jobs:
             git add ${LATEST_DIR}
             git commit -m "New CSV generated '${PREV_VER}' -> '${BUNDLE_VER}' [skip ci]"
             git push -q https://${GITHUB_TOKEN}@github.com/Tufin/orca-operator.git ${CIRCLE_BRANCH}
+      - run:
+          name: Check set env var
+          environment:
+            TAG_PREFIX: test
+            TAG_ACTION: env
+            TAG_SET_ENV: TUFIN_SET_VAR_TEST
+          command: |
+            if [[ "$TUFIN_SET_VAR_TEST" == "true" ]]; then
+              echo "var was set!"
+              exit 0
+            fi
 workflows:
   version: 2
   main:
