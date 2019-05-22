@@ -52,7 +52,10 @@ jobs:
             for f in $(find ./ -type f -name "*.yaml"); do cp $f redhat/; done
 
             cd redhat
-            zip -r orca-operator-v${BUNDLE_VER}-redhat.zip ./*
+            zip -r ./../orca-operator-v${BUNDLE_VER}-redhat.zip ./*
+
+            cd ..
+            rm -rf redhat
       - store_artifacts:
           path: deploy/olm-catalog/orca-operator
       - run:
