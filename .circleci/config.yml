@@ -26,7 +26,7 @@ jobs:
 
             # shared functions
             echo 'export CHECK_COMMIT_MSG="$([[ $(git log -1 --pretty=%B) == *"[${TAG_PREFIX}"*" ${TAG_ACTION}"*"]" ]] && echo true)"' >> $BASH_ENV
-            echo "\$\(\[\[ \! -z \$\{TAG_SET_ENV\} \&\& -z \$\{\!TAG_SET_ENV\} \]\] \&\& echo \"export declare \$\{TAG_SET_ENV\}=\$\{CHECK_COMMIT_MSG\}\"\)" >> $BASH_ENV
+            echo "\$\([[ \! -z \$\{TAG_SET_ENV\} \&\& -z \$\{\!TAG_SET_ENV\} ]] \&\& echo \"export declare \$\{TAG_SET_ENV\}=\$\{CHECK_COMMIT_MSG\}\"\)" >> $BASH_ENV
 
             source $BASH_ENV
       - run:
