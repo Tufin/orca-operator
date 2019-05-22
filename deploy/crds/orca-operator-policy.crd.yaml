@@ -19,3 +19,16 @@ spec:
     listKind: PolicyList
     shortNames:
       - pol
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          type: object
+        spec:
+          type: object
+        status:
+          type: object

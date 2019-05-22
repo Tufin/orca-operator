@@ -22,6 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 	"fmt"
 	"reflect"
+	"github.com/tufin/orca-operator/pkg/controller/common"
 )
 
 var log = logf.Log.WithName("controller_orca")
@@ -32,11 +33,6 @@ var log = logf.Log.WithName("controller_orca")
  */
 
 const (
-	StatusUnknown  = "Unknown"
-	StatusCreating = "Creating"
-	StatusReady    = "Ready"
-	StatusFailed   = "Failed"
-
 	ApiGroupRBAC       = "rbac.authorization.k8s.io"
 	ApiGroupIstio      = "networking.istio.io"
 	ApiGroupNetworking = "networking.k8s.io"
@@ -132,7 +128,7 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 		return reconcile.Result{}, err
 	}
 
-	if instance.Status.Phase != StatusReady && instance.Status.Phase != "" {
+	if instance.Status.Phase != common.StatusReady && instance.Status.Phase != "" {
 		return reconcile.Result{}, nil
 	}
 
@@ -163,17 +159,17 @@ func (r *ReconcileOrca) createResourceArray(instance *appv1alpha1.Orca, resource
 
 	var reconcileResult reconcile.Result
 	var err error
-	instance.Status.Phase = StatusCreating
+	instance.Status.Phase = common.StatusCreating
 
 	for _, resourceRequest := range resources {
 		reconcileResult, err = r.createResource(instance, resourceRequest.Required, resourceRequest.RequiredStruct)
 		if err != nil {
-			r.UpdateStatus(instance, StatusFailed)
+			r.UpdateStatus(instance, common.StatusFailed)
 			return reconcileResult, err
 		}
 	}
 
-	r.UpdateStatus(instance, StatusReady)
+	r.UpdateStatus(instance, common.StatusReady)
 
 	return reconcile.Result{}, nil
 }
@@ -193,7 +189,7 @@ func (r *ReconcileOrca) createResource(instance *appv1alpha1.Orca, required meta
 	reqLogger := log.WithValues("Kind", fmt.Sprintf("%T", requiredStruct), "Namespace", required.GetNamespace(), "Resource Name", required.GetName())
 	ns := required.GetNamespace()
 
-	if instance.Status.Phase != StatusCreating {
+	if instance.Status.Phase != common.StatusCreating {
 		return reconcile.Result{}, nil
 	}
 
