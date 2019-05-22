@@ -18,7 +18,9 @@ jobs:
           command: |
             echo 'export BUNDLE_DIR="deploy/olm-catalog/orca-operator"' >> $BASH_ENV
             echo 'export LATEST_DIR="$(find ${BUNDLE_DIR} -type d -name 0* | sort | tail -n1)"' >> $BASH_ENV
+            echo 'export PREV_DIR="$(find ${BUNDLE_DIR} -type d -name 0* | sort | tail -n2 | head -n1)"' >> $BASH_ENV
             echo 'export LATEST_VER="${LATEST_DIR##*/}"' >> $BASH_ENV
+            echo 'export PREV_VER="${PREV_DIR##*/}"' >> $BASH_ENV
             echo 'export BUNDLE_VER="${LATEST_VER%.*}.${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
 
             source $BASH_ENV
@@ -101,7 +103,7 @@ jobs:
             fi
 
             if [[ "$TUFIN_PUSH_CSV_TO_GITHUB" != "true" ]]; then
-              echo "Not pushing to new CSV to github"
+              echo "Not pushing new CSV to github"
               exit 0
             fi
 
@@ -110,7 +112,7 @@ jobs:
             git config --global user.name "reuvenharrison"
 
             git add ${LATEST_DIR}
-            git commit -m "New CSV generated '${BUNDLE_VER}' [skip ci]"
+            git commit -m "New CSV generated '${PREV_VER}' -> '${BUNDLE_VER}' [skip ci]"
             git push -q https://${GITHUB_TOKEN}@github.com/Tufin/orca-operator.git ${CIRCLE_BRANCH}
 workflows:
   version: 2
