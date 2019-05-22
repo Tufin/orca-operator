@@ -61,7 +61,7 @@ jobs:
       - run:
           name: Push to dockerhub
           command: |
-            if [[ $(git log -1 --pretty=%B) == *"[push docker]"* ]]; then
+            if [[ $(git log -1 --pretty=%B) == *"[push"*" docker"*"]"* ]]; then
               TUFIN_PUBLISH_DOCKERHUB="true"
             fi
 
@@ -77,7 +77,7 @@ jobs:
       - run:
           name: Push to redhat registry
           command: |
-            if [[ $(git log -1 --pretty=%B) == *"[push redhat]"* ]]; then
+            if [[ $(git log -1 --pretty=%B) == *"[push"*" redhat"*"]"* ]]; then
               TUFIN_PUBLISH_REDHAT="true"
             fi
 
@@ -92,7 +92,7 @@ jobs:
       - run:
           name: Push CSV to github
           command: |
-            if [[ $(git log -1 --pretty=%B) == *"[push csv]"* ]]; then
+            if [[ $(git log -1 --pretty=%B) == *"[push"*" csv"*"]"* ]]; then
               TUFIN_PUSH_CSV_TO_GITHUB="true"
             fi
 
