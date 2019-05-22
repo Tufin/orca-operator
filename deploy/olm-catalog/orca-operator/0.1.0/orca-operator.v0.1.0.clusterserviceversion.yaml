@@ -36,6 +36,24 @@ spec:
       - description: Your project in Orca - a friendly name for your Kubernetes cluster
         displayName: project
         path: project
+      - description: The Namespace for the Orca Agent
+        displayName: Orca Agent Namespace
+        path: namespace
+      - description: The docker images for the Orca Agent
+        displayName: Orca Agent images
+        path: images
+      - description: List of Config Maps to ignore
+        displayName: Ignored Config Maps
+        path: ignored_config_maps
+      - description: Orca Agent Endpoints
+        displayName: Endpoints
+        path: endpoints
+      - description: Control over the Components of the Orca Agent
+        displayName: Orca Agent Components
+        path: components
+      - description: The platform the Orca Agent is deployed on
+        displayName: Kubernetes Platform
+        path: kube_platform
       statusDescriptors:
       - description: Orca CRD Status
         displayName: Phase
@@ -49,6 +67,20 @@ spec:
       - kind: NetworkPolicy
         name: ""
         version: networking.k8s.io/v1
+      specDescriptors:
+      - description: Toggle between Enforce Mode and Learn Mode
+        displayName: Mode
+        path: mode
+      - description: Set Kubernetes Network Policy to Allow-All in Learn Mode
+        displayName: Kubernetes Network Policy
+        path: networkPolicyAllowAll
+      - description: Orca Policy allowed connections
+        displayName: Rules
+        path: rules
+      statusDescriptors:
+      - description: Orca Policy Status
+        displayName: Phase
+        path: phase
       version: v1
   description: |-
     Tufin Orca is a cloud-based security monitoring and enforcement platform for Kubernetes clusters, containers and microservices.

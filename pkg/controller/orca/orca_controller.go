@@ -144,7 +144,6 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 
 	instance.Spec.Components["istio"] = apis.Istio && instance.Spec.Components["istio"]
 	instance.Spec.Components["kube-network-policy"] = apis.NetworkPolicy && instance.Spec.Components["kube-network-policy"]
-	//instance.Spec.Components["Istio"] = apis.Istio && instance.Spec.Components["Istio"]
 
 	kiteDeployment := getKiteDeployment(instance)
 	kiteService := getKiteService(instance)
@@ -241,59 +240,6 @@ func (r *ReconcileOrca) createResource(instance *appv1alpha1.Orca, required meta
 
 	return reconcile.Result{}, nil
 }
-
-//func (r *ReconcileOrca) injectTufinIntoKubeDNS(instance *appv1alpha1.Orca, required metav1.Object, requiredStruct runtime.Object) (reconcile.Result, error) {
-//
-//	reqLogger := log.WithValues("Kind", fmt.Sprintf("%T", requiredStruct), "Namespace", required.GetNamespace(), "Resource Name", required.GetName())
-//	ns := required.GetNamespace()
-//
-//	if instance.Status.Phase != StatusCreating {
-//		return reconcile.Result{}, nil
-//	}
-//
-//	if err := controllerutil.SetControllerReference(instance, required, r.scheme); err != nil {
-//		reqLogger.Error(err, "Failed to set the operator as the resource owner")
-//		return reconcile.Result{}, err
-//	}
-//
-//	err := r.client.Get(context.TODO(), types.NamespacedName{Name: required.GetName(), Namespace: ns}, requiredStruct)
-//	if err != nil && errors.IsNotFound(err) {
-//		reqLogger.Info("Creating Resource...")
-//		err = r.client.Create(context.TODO(), required.(runtime.Object))
-//		if err != nil {
-//			reqLogger.Error(err, "Resource creation failed")
-//			return reconcile.Result{}, err
-//		}
-//
-//		reqLogger.Info("Resource created successfully")
-//		return reconcile.Result{}, nil
-//	} else if err != nil {
-//
-//		return reconcile.Result{}, err
-//	} else {
-//		reqLogger.Info("Resource already exists, trying to update...")
-//
-//		if reflect.DeepEqual(required, requiredStruct.(metav1.Object)) {
-//			reqLogger.Info("Resource is already up to date")
-//			return reconcile.Result{}, nil
-//		}
-//
-//		err = r.client.Delete(context.TODO(), requiredStruct)
-//		if err != nil {
-//			reqLogger.Error(err, "Resource update failed, deletion failed")
-//			return reconcile.Result{}, err
-//		}
-//		err = r.client.Create(context.TODO(), required.(runtime.Object))
-//		if err != nil {
-//			reqLogger.Error(err, "Resource update failed, creation failed")
-//			return reconcile.Result{}, err
-//		}
-//
-//		reqLogger.Info("Resource update succeeded")
-//	}
-//
-//	return reconcile.Result{}, nil
-//}
 
 func (r *ReconcileOrca) checkAvailableAPI(apiGroup string) bool {
 

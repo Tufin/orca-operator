@@ -7,3 +7,5 @@ spec:
   mode: learning
   networkPolicyAllowAll: true
   rules: []
+status:
+  phase:

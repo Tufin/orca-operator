@@ -8,44 +8,15 @@ import (
 )
 
 const (
-	app        = "app"
-	name       = "name"
-	kite       = "kite"
-	conntrack  = "conntrack"
-	tufinDNS   = "tufindns"
-	kubeDNS    = "kube-dns"
-	kubeSystem = "kube-system"
+	app       = "app"
+	name      = "name"
+	kite      = "kite"
+	conntrack = "conntrack"
 
 	dockerSocketVolumeName     = "docker-socket"
 	dockerSocketVolumePath     = "/var/run/docker.sock"
-	scopePluginsVolumeName     = "scope-plugins"
-	scopePluginsVolumePath     = "/var/run/scope/plugins"
 	scopeKernelDebugVolumeName = "sys-kernel-debug"
 	scopeKernelDebugVolumePath = "/sys/kernel/debug"
-
-	VerbAll    = "*"
-	VerbGet    = "get"
-	VerbWatch  = "watch"
-	VerbList   = "list"
-	VerbCreate = "create"
-	VerbUpdate = "update"
-	VerbDelete = "delete"
-
-	ResourceNodes                  = "nodes"
-	ResourceIngresses              = "ingresses"
-	ResourceEndpoints              = "endpoints"
-	ResourceConfigMaps             = "configmaps"
-	ResourceNamespaces             = "namespaces"
-	ResourceServices               = "services"
-	ResourceDeployments            = "deployments"
-	ResourceDaemonSets             = "daemonsets"
-	ResourcePods                   = "pods"
-	ResourceSecrets                = "secrets"
-	ResourceStorageClasses         = "storageclasses"
-	ResourcePersistentVolumes      = "persistentvolumes"
-	ResourcePersistentVolumeClaims = "persistentvolumeclaims"
-	ResourceCronJobs               = "cronjobs"
-	ResourceJobs                   = "jobs"
 )
 
 func GetBoolRef(val bool) *bool {

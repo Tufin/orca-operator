@@ -25,3 +25,5 @@ spec:
     watcher: true
     kube-network-policy: true
   kube_platform: Openshift
+status:
+  phase:
