@@ -58,6 +58,7 @@ jobs:
             rm -rf redhat
       - store_artifacts:
           path: deploy/olm-catalog/orca-operator
+          destination: catalog
       - run:
           name: Push to dockerhub
           command: |
