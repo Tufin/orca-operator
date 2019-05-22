@@ -24,7 +24,7 @@ jobs:
             echo 'export PREV_VER="${PREV_DIR##*/}"' >> $BASH_ENV
             echo 'export BUNDLE_VER="${RELEASE}.${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
 
-            // shared functions
+            # shared functions
             echo 'export CHECK_COMMIT_MSG="$([[ $(git log -1 --pretty=%B) == *"[${TAG_PREFIX}"*" ${TAG_ACTION}"*"]" ]] && echo true)"' >> $BASH_ENV
 
             source $BASH_ENV
