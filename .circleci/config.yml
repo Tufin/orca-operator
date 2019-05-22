@@ -6,6 +6,7 @@ jobs:
       - image: tufinim/circleci-go:master
     environment:
       RELEASE: 0.1
+      TAG_PREFIX: push
     steps:
       - checkout
       - setup_remote_docker
@@ -14,7 +15,7 @@ jobs:
           command: |
             operator-sdk generate k8s
       - run:
-          name: Build operator
+          name: Init shared ENV vars
           command: |
             echo 'export BUNDLE_DIR="deploy/olm-catalog/orca-operator"' >> $BASH_ENV
             echo 'export LATEST_DIR="$(find ${BUNDLE_DIR} -type d -name ${RELEASE%.*}* | sort | tail -n1)"' >> $BASH_ENV
@@ -23,8 +24,13 @@ jobs:
             echo 'export PREV_VER="${PREV_DIR##*/}"' >> $BASH_ENV
             echo 'export BUNDLE_VER="${RELEASE}.${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
 
-            source $BASH_ENV
+            // shared functions
+            echo 'export CHECK_COMMIT_MSG="$([[ $(git log -1 --pretty=%B) == *"[${TAG_PREFIX}"*" ${TAG_ACTION}"*"]" ]] && echo true)"' >> $BASH_ENV
 
+            source $BASH_ENV
+      - run:
+          name: Build operator
+          command: |
             operator-sdk build tufin/orca-operator:latest --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
 #            for v0.7.0+
 #            operator-sdk build tufin/orca-operator:latest --docker-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
@@ -66,8 +72,10 @@ jobs:
           destination: catalog
       - run:
           name: Push to dockerhub
+          environment:
+            TAG_ACTION: docker
           command: |
-            if [[ $(git log -1 --pretty=%B) == *"[push"*" docker"*"]"* ]]; then
+            if [[ "${CHECK_COMMIT_MSG}" == "true" ]]; then
               TUFIN_PUBLISH_DOCKERHUB="true"
             fi
 
@@ -82,8 +90,10 @@ jobs:
             docker push tufin/orca-operator:latest
       - run:
           name: Push to redhat registry
+          environment:
+            TAG_ACTION: redhat
           command: |
-            if [[ $(git log -1 --pretty=%B) == *"[push"*" redhat"*"]"* ]]; then
+            if [[ "${CHECK_COMMIT_MSG}" == "true" ]]; then
               TUFIN_PUBLISH_REDHAT="true"
             fi
 
@@ -97,8 +107,10 @@ jobs:
             docker push scan.connect.redhat.com/ospid-bd3f08ed-337c-4f15-8905-421a0d26ea07/orca-operator:${BUNDLE_VER}
       - run:
           name: Push CSV to github
+          environment:
+            TAG_ACTION: csv
           command: |
-            if [[ $(git log -1 --pretty=%B) == *"[push"*" csv"*"]"* ]]; then
+            if [[ "${CHECK_COMMIT_MSG}" == "true" ]]; then
               TUFIN_PUSH_CSV_TO_GITHUB="true"
             fi
 
@@ -114,6 +126,15 @@ jobs:
             git add ${LATEST_DIR}
             git commit -m "New CSV generated '${PREV_VER}' -> '${BUNDLE_VER}' [skip ci]"
             git push -q https://${GITHUB_TOKEN}@github.com/Tufin/orca-operator.git ${CIRCLE_BRANCH}
+      - run:
+          name: Push CSV to github
+          environment:
+            TAG_PREFIX: print
+            TAG_ACTION: debug
+          command: |
+            if [[ "${CHECK_COMMIT_MSG}" == "true" ]]; then
+              echo "Found [print debug] in git commit..."
+            fi
 workflows:
   version: 2
   main:
