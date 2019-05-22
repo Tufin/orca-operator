@@ -26,20 +26,8 @@ jobs:
 
             # shared functions
             echo 'export CHECK_COMMIT_MSG="$([[ $(git log -1 --pretty=%B) == *"[${TAG_PREFIX}"*" ${TAG_ACTION}"*"]" ]] && echo true)"' >> $BASH_ENV
-            echo "\$\([[ \! -z \$\{TAG_SET_ENV\} \&\& -z \$\{\!TAG_SET_ENV\} ]] \&\& echo \"export declare \$\{TAG_SET_ENV\}=\$\{CHECK_COMMIT_MSG\}\"\)" >> $BASH_ENV
 
             source $BASH_ENV
-      - run:
-          name: Check set env var
-          environment:
-            TAG_PREFIX: test
-            TAG_ACTION: env
-            TAG_SET_ENV: TUFIN_SET_VAR_TEST
-          command: |
-            if [[ "$TUFIN_SET_VAR_TEST" == "true" ]]; then
-              echo "var was set!"
-              exit 0
-            fi
       - run:
           name: Build operator
           command: |
