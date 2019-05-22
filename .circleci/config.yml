@@ -17,11 +17,11 @@ jobs:
           name: Build operator
           command: |
             echo 'export BUNDLE_DIR="deploy/olm-catalog/orca-operator"' >> $BASH_ENV
-            echo 'export LATEST_DIR="$(find ${BUNDLE_DIR} -type d -name 0* | sort | tail -n1)"' >> $BASH_ENV
-            echo 'export PREV_DIR="$(find ${BUNDLE_DIR} -type d -name 0* | sort | tail -n2 | head -n1)"' >> $BASH_ENV
+            echo 'export LATEST_DIR="$(find ${BUNDLE_DIR} -type d -name ${RELEASE%.*}* | sort | tail -n1)"' >> $BASH_ENV
+            echo 'export PREV_DIR="$(find ${BUNDLE_DIR} -type d -name ${RELEASE%.*}* | sort | tail -n2 | head -n1)"' >> $BASH_ENV
             echo 'export LATEST_VER="${LATEST_DIR##*/}"' >> $BASH_ENV
             echo 'export PREV_VER="${PREV_DIR##*/}"' >> $BASH_ENV
-            echo 'export BUNDLE_VER="${LATEST_VER%.*}.${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
+            echo 'export BUNDLE_VER="${RELEASE}.${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
 
             source $BASH_ENV
 
