@@ -126,15 +126,6 @@ jobs:
             git add ${LATEST_DIR}
             git commit -m "New CSV generated '${PREV_VER}' -> '${BUNDLE_VER}' [skip ci]"
             git push -q https://${GITHUB_TOKEN}@github.com/Tufin/orca-operator.git ${CIRCLE_BRANCH}
-      - run:
-          name: Push CSV to github
-          environment:
-            TAG_PREFIX: print
-            TAG_ACTION: debug
-          command: |
-            if [[ "${CHECK_COMMIT_MSG}" == "true" ]]; then
-              echo "Found [print debug] in git commit..."
-            fi
 workflows:
   version: 2
   main:
