@@ -153,6 +153,12 @@ spec:
           - '*'
           verbs:
           - '*'
+        - apiGroups:
+          - networking.tufin.io
+          resources:
+          - '*'
+          verbs:
+          - '*'
         serviceAccountName: orca-operator
       - rules:
         - apiGroups:
