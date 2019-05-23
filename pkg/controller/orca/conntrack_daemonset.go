@@ -42,7 +42,7 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 						{Effect: corev1.TaintEffectNoSchedule, Operator: corev1.TolerationOpExists},
 					},
 					Volumes: []corev1.Volume{
-						GetHostVolume(dockerSocketVolumeName, dockerSocketVolumePath, corev1.HostPathSocket),
+						GetHostVolume(dockerSocketVolumeName, dockerSocketVolumePath, corev1.HostPathUnset),
 						GetHostVolume(scopeKernelDebugVolumeName, scopeKernelDebugVolumePath, corev1.HostPathDirectoryOrCreate),
 					},
 					Containers: []corev1.Container{

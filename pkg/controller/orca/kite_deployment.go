@@ -36,7 +36,7 @@ func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
 				Spec: corev1.PodSpec{
 					ServiceAccountName: kite,
 					Volumes: []corev1.Volume{
-						GetHostVolume(dockerSocketVolumeName, dockerSocketVolumePath, corev1.HostPathSocket),
+						GetHostVolume(dockerSocketVolumeName, dockerSocketVolumePath, corev1.HostPathUnset),
 					},
 					Containers: []corev1.Container{
 						{
