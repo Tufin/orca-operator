@@ -3,8 +3,8 @@ kind: Orca
 metadata:
   name: orca
 spec:
-  domain: generic-bank
-  project: retail
+  domain: my-domain
+  project: my-project
   namespace: placeholder
   images:
     kite: "registry.connect.redhat.com/tufin/kite"
