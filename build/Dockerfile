@@ -14,6 +14,9 @@ LABEL release=$release
 LABEL summary="Tufin Orca is a security solution that enables automation of network security policies for applications running on Kubernetes platforms."
 LABEL description="Orca Operator deploys the Orca agent into a Kubernetes cluster."
 
+# update pkgs
+RUN yum -y update-minimal --security --sec-setopt=tsflags=nodocs
+
 # install operator binary
 COPY build/_output/bin/orca-operator ${OPERATOR}
 COPY licenses/ /licenses/
