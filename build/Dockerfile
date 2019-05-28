@@ -1,3 +1,12 @@
+FROM registry.access.redhat.com/ubi7/ubi-init:latest as intermediate
+
+ARG redhat_user
+ARG redhat_pass
+
+# update pkgs
+RUN subscription-manager register --username ${redhat_user} --password ${redhat_pass} --auto-attach
+RUN yum -y update-minimal --security --setopt=tsflags=nodocs
+
 FROM registry.access.redhat.com/ubi7/ubi-init:latest
 
 ENV OPERATOR=/usr/local/bin/orca-operator \
@@ -13,10 +22,6 @@ LABEL version=$version
 LABEL release=$release
 LABEL summary="Tufin Orca is a security solution that enables automation of network security policies for applications running on Kubernetes platforms."
 LABEL description="Orca Operator deploys the Orca agent into a Kubernetes cluster."
-
-# update pkgs
-RUN subscription-manager register --username ${REDHAT_SUBSCRIPTION_USER} --password ${REDHAT_SUBSCRIPTION_PASS} --auto-attach
-RUN yum -y update-minimal --security --setopt=tsflags=nodocs
 
 # install operator binary
 COPY build/_output/bin/orca-operator ${OPERATOR}

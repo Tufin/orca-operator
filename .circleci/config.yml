@@ -31,7 +31,10 @@ jobs:
       - run:
           name: Build operator
           command: |
-            operator-sdk build tufin/orca-operator:latest --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
+            operator-sdk build tufin/orca-operator:latest --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} \
+            --build-arg release=${RELEASE} \
+            --build-arg redhat_user=${REDHAT_SUBSCRIPTION_USER} \
+            --build-arg redhat_pass=${REDHAT_SUBSCRIPTION_PASS}"
 #            for v0.7.0+
 #            operator-sdk build tufin/orca-operator:latest --docker-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${RELEASE}"
       - run:
