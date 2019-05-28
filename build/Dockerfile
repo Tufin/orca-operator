@@ -15,6 +15,7 @@ LABEL summary="Tufin Orca is a security solution that enables automation of netw
 LABEL description="Orca Operator deploys the Orca agent into a Kubernetes cluster."
 
 # update pkgs
+RUN subscription-manager register --username ${REDHAT_SUBSCRIPTION_USER} --password ${REDHAT_SUBSCRIPTION_PASS} --auto-attach
 RUN yum -y update-minimal --security --setopt=tsflags=nodocs
 
 # install operator binary
