@@ -8,7 +8,7 @@ spec:
   namespace: placeholder
   images:
     kite: "registry.connect.redhat.com/tufin/kite"
-    conntrack: "registry.connect.redhat.com/tufin/conntrack"
+    monitor: "registry.connect.redhat.com/tufin/monitor"
   ignored_config_maps:
     - kube-system/ingress-gce-lock
     - istio-system/istio-ingress-controller-leader-istio
