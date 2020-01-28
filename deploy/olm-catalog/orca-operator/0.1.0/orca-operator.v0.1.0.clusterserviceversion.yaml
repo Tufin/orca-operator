@@ -340,6 +340,8 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: orca-operator
+                - name: RELATED_IMAGE_UBI_MINIMAL
+                  value: registry.access.redhat.com/ubi7/ubi-minimal:latest
                 image: registry.connect.redhat.com/tufin/orca-operator
                 imagePullPolicy: Always
                 name: orca-operator
