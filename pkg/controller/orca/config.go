@@ -1,17 +1,18 @@
 package orca
 
 import (
-	"strings"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	corev1 "k8s.io/api/core/v1"
 	"strconv"
+	"strings"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
-	app       = "app"
-	name      = "name"
-	kite      = "kite"
-	conntrack = "conntrack"
+	app     = "app"
+	name    = "name"
+	kite    = "kite"
+	monitor = "monitor"
 
 	dockerSocketVolumeName     = "docker-socket"
 	dockerSocketVolumePath     = "/var/run/docker.sock"
@@ -62,7 +63,7 @@ func GetHostVolume(name string, path string, volType corev1.HostPathType) corev1
 	}
 }
 
-func GetConfigMapVolume(volName string, configName string, items ... corev1.KeyToPath) corev1.Volume {
+func GetConfigMapVolume(volName string, configName string, items ...corev1.KeyToPath) corev1.Volume {
 
 	return corev1.Volume{
 		Name: volName,

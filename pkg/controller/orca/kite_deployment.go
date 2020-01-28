@@ -82,7 +82,7 @@ func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
 								},
 								{
 									Name:  "TUFIN_INSTALL_CONNTRACK",
-									Value: BoolToString(cr.Spec.Components["conntrack"]),
+									Value: BoolToString(cr.Spec.Components["monitor"]),
 								},
 								{
 									Name:  "TUFIN_INSTALL_SYSLOG",

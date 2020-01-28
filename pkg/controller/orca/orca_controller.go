@@ -6,10 +6,14 @@ import (
 	appv1alpha1 "github.com/tufin/orca-operator/pkg/apis/tufin/v1alpha1"
 	tufinv1alpha1 "github.com/tufin/orca-operator/pkg/apis/tufin/v1alpha1"
 
+	"fmt"
+	"reflect"
+
+	"github.com/tufin/orca-operator/pkg/controller/common"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -20,9 +24,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"fmt"
-	"reflect"
-	"github.com/tufin/orca-operator/pkg/controller/common"
 )
 
 var log = logf.Log.WithName("controller_orca")
@@ -143,7 +144,7 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 
 	kiteDeployment := getKiteDeployment(instance)
 	kiteService := getKiteService(instance)
-	conntrackDaemonset := getConntrackDaemonset(instance)
+	conntrackDaemonset := getMonitorDaemonset(instance)
 
 	reconcileResult, err := r.createResourceArray(instance,
 		ResourceRequest{Required: kiteDeployment, RequiredStruct: &appsv1.Deployment{}},
