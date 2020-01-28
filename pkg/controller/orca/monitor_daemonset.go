@@ -6,11 +6,16 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"os"
 )
 
 func getMonitorDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 
 	labels := GetLabels(app + "=" + monitor)
+
+	if monitorImg := os.Getenv("RELATED_IMAGE_TUFIN_MONITOR"); monitorImg != "" {
+		cr.Spec.Images[monitor] = monitorImg
+	}
 
 	return &appsv1.DaemonSet{
 		TypeMeta: metav1.TypeMeta{

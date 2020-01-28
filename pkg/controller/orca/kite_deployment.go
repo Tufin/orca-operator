@@ -8,12 +8,17 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"os"
 )
 
 func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
 
 	var replicas int32 = 1
 	labels := GetLabels(app + "=" + kite)
+
+	if kiteImg := os.Getenv("RELATED_IMAGE_TUFIN_KITE"); kiteImg != "" {
+		cr.Spec.Images[kite] = kiteImg
+	}
 
 	return &appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{
