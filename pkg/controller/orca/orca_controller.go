@@ -144,12 +144,12 @@ func (r *ReconcileOrca) Reconcile(request reconcile.Request) (reconcile.Result, 
 
 	kiteDeployment := getKiteDeployment(instance)
 	kiteService := getKiteService(instance)
-	conntrackDaemonset := getMonitorDaemonset(instance)
+	monitorDaemonset := getMonitorDaemonset(instance)
 
 	reconcileResult, err := r.createResourceArray(instance,
 		ResourceRequest{Required: kiteDeployment, RequiredStruct: &appsv1.Deployment{}},
 		ResourceRequest{Required: kiteService, RequiredStruct: &corev1.Service{}},
-		ResourceRequest{Required: conntrackDaemonset, RequiredStruct: &appsv1.DaemonSet{}},
+		ResourceRequest{Required: monitorDaemonset, RequiredStruct: &appsv1.DaemonSet{}},
 	)
 
 	reqLogger.Info("Orca was successfully deployed in the cluster!")

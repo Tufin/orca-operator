@@ -3,9 +3,9 @@ kind: Orca
 metadata:
   name: orca
 spec:
-  domain: my-domain
-  project: my-project
-  namespace: placeholder
+  domain: generic-bank
+  project: openshift4
+  namespace: tufin-system
   images:
     kite: "registry.connect.redhat.com/tufin/kite"
     monitor: "registry.connect.redhat.com/tufin/monitor"
