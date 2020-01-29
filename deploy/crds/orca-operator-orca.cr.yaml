@@ -3,12 +3,12 @@ kind: Orca
 metadata:
   name: orca
 spec:
-  domain: my-domain
-  project: my-project
-  namespace: placeholder
+  domain: generic-bank
+  project: openshift4
+  namespace: tufin-system
   images:
     kite: "registry.connect.redhat.com/tufin/kite"
-    conntrack: "registry.connect.redhat.com/tufin/conntrack"
+    monitor: "registry.connect.redhat.com/tufin/monitor"
   ignored_config_maps:
     - kube-system/ingress-gce-lock
     - istio-system/istio-ingress-controller-leader-istio

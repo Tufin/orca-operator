@@ -2,7 +2,7 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   annotations:
-    alm-examples: '[{"apiVersion":"tufin.io/v1alpha1","kind":"Orca","metadata":{"name":"orca"},"spec":{"components":{"conntrack":true,"dns":false,"istio":false,"kube-network-policy":true,"pusher":true,"syslog":false,"watcher":true},"domain":"generic-bank","endpoints":{"guru":"guru.tufin.io:443","orca":"https://orca.tufin.io","registry":"registry.tufin.io"},"ignored_config_maps":["kube-system/ingress-gce-lock","istio-system/istio-ingress-controller-leader-istio"],"images":{"conntrack":"registry.connect.redhat.com/tufin/conntrack","kite":"registry.connect.redhat.com/tufin/kite"},"kube_platform":"Openshift","namespace":"placeholder","project":"retail"}},{"apiVersion":"networking.tufin.io/v1","kind":"Policy","metadata":{"name":"orca","namespace":"placeholder"},"spec":{"mode":"learning","networkPolicyAllowAll":true,"rules":[]}}]'
+    alm-examples: '[{"apiVersion":"tufin.io/v1alpha1","kind":"Orca","metadata":{"name":"orca"},"spec":{"components":{"monitor":true,"dns":false,"istio":false,"kube-network-policy":true,"pusher":true,"syslog":false,"watcher":true},"domain":"generic-bank","endpoints":{"guru":"guru.tufin.io:443","orca":"https://orca.tufin.io","registry":"registry.tufin.io"},"ignored_config_maps":["kube-system/ingress-gce-lock","istio-system/istio-ingress-controller-leader-istio"],"images":{"monitor":"registry.connect.redhat.com/tufin/monitor","kite":"registry.connect.redhat.com/tufin/kite"},"kube_platform":"Openshift","namespace":"placeholder","project":"retail"}},{"apiVersion":"networking.tufin.io/v1","kind":"Policy","metadata":{"name":"orca","namespace":"placeholder"},"spec":{"mode":"learning","networkPolicyAllowAll":true,"rules":[]}}]'
     capabilities: Basic Install
     categories: Security
     certified: "true"
@@ -315,7 +315,7 @@ spec:
           - securitycontextconstraints
           verbs:
           - use
-        serviceAccountName: conntrack
+        serviceAccountName: monitor
       deployments:
       - name: orca-operator
         spec:
@@ -340,6 +340,10 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: orca-operator
+                - name: RELATED_IMAGE_TUFIN_MONITOR
+                  value: registry.connect.redhat.com/tufin/monitor
+                - name: RELATED_IMAGE_TUFIN_KITE
+                  value: registry.connect.redhat.com/tufin/kite
                 image: registry.connect.redhat.com/tufin/orca-operator
                 imagePullPolicy: Always
                 name: orca-operator

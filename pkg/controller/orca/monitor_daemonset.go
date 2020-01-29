@@ -6,18 +6,23 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"os"
 )
 
-func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
+func getMonitorDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 
-	labels := GetLabels(app + "=" + conntrack)
+	labels := GetLabels(app + "=" + monitor)
+
+	if monitorImg := os.Getenv("RELATED_IMAGE_TUFIN_MONITOR"); monitorImg != "" {
+		cr.Spec.Images[monitor] = monitorImg
+	}
 
 	return &appsv1.DaemonSet{
 		TypeMeta: metav1.TypeMeta{
 			Kind: "DaemonSet",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      conntrack,
+			Name:      monitor,
 			Namespace: cr.Namespace,
 			Labels:    labels,
 		},
@@ -34,7 +39,7 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 					Labels:    labels,
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName: conntrack,
+					ServiceAccountName: monitor,
 					DNSPolicy:          corev1.DNSClusterFirstWithHostNet,
 					HostNetwork:        true,
 					HostPID:            true,
@@ -47,21 +52,16 @@ func getConntrackDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 					},
 					Containers: []corev1.Container{
 						{
-							Name:  conntrack,
-							Image: cr.Spec.Images[conntrack],
+							Name:  monitor,
+							Image: cr.Spec.Images[monitor],
 							VolumeMounts: []corev1.VolumeMount{
 								{Name: dockerSocketVolumeName, MountPath: dockerSocketVolumePath},
 								{Name: scopeKernelDebugVolumeName, MountPath: scopeKernelDebugVolumePath},
 							},
 							Args: []string{
-								"--mode=probe",
-								"--probe-only",
-								"--probe.kubernetes=true",
-								"--probe.docker.bridge=docker0",
-								"--probe.docker=true",
 								"kite." + cr.Namespace + ":80",
 							},
-							Command: []string{"/home/weave/scope"},
+							Command: []string{"/home/tufin/monitor"},
 							SecurityContext: &corev1.SecurityContext{
 								Privileged: GetBoolRef(true),
 							},

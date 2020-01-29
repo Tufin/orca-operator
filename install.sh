@@ -12,7 +12,7 @@ fi
 kubectl ${args} apply -f deploy/service_account.yaml
 kubectl apply -f deploy/role.yaml
 #kubectl ${args} apply -f deploy/role_binding.yaml
-roles="kite conntrack orca-operator"
+roles="kite monitor orca-operator"
 for role in $roles; do
     kubectl create clusterrolebinding "$role" --clusterrole "$role" --serviceaccount "${ns}:${role}"
 
@@ -22,6 +22,8 @@ for role in $roles; do
     fi
 done
 
-kubectl apply -f deploy/crds/tufin_v1alpha1_orca_crd.yaml
-kubectl apply -f deploy/crds/tufin_v1_policy_crd.yaml
+kubectl apply -f deploy/crds/orca-operator-orca.crd.yaml
+kubectl apply -f deploy/crds/orca-operator-orca.cr.yaml
+kubectl apply -f deploy/crds/orca-operator-policy.crd.yaml
+kubectl apply -f deploy/crds/orca-operator-policy.cr.yaml
 kubectl ${args} apply -f deploy/operator.yaml

@@ -5,7 +5,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: orca-operator
-  namespace: placeholder
+  namespace: tufin-system
 roleRef:
   kind: ClusterRole
   name: orca-operator
@@ -18,7 +18,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: kite
-  namespace: placeholder
+  namespace: tufin-system
 roleRef:
   kind: ClusterRole
   name: kite
@@ -27,12 +27,12 @@ roleRef:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: conntrack
+  name: monitor
 subjects:
 - kind: ServiceAccount
-  name: conntrack
+  name: monitor
   namespace: placeholder
 roleRef:
   kind: ClusterRole
-  name: conntrack
+  name: monitor
   apiGroup: rbac.authorization.k8s.io

@@ -21,7 +21,7 @@ Run the following command - you can choose the namespace to deploy the operator 
 
 # Create the Orca CR
 Fill in the Domain, Project & Namespace - The agent will be installed in the provided namespace.
-The controller will watch this CRD and install the Orca agent components (kite, conntrack etc.):
+The controller will watch this CRD and install the Orca agent components (kite, monitor etc.):
 ```
 kubectl create -f deploy/crds/tufin_v1alpha1_orca_cr.yaml
 ```
@@ -52,7 +52,7 @@ kubectl create -f deploy/operator.yaml
 
 # Deploying on RH OpenShift
 In order to deploy in OpenShift we need to add `SecurityContextConstraints` 
-to 'the operator, kite & conntrack' service accounts as follows:
+to 'the operator, kite & monitor' service accounts as follows:
 
 ```
 # for kite
@@ -60,8 +60,8 @@ oc adm policy add-scc-to-user hostaccess -z kite -n tufin-system
 oc adm policy add-scc-to-user hostnetwork -z kite -n tufin-system
 oc adm policy add-scc-to-user node-exporter -z kite -n tufin-system
 
-# for conntrack
-oc adm policy add-scc-to-user privileged -z conntrack -n tufin-system
+# for monitor
+oc adm policy add-scc-to-user privileged -z monitor -n tufin-system
 ```
 
 # Details
