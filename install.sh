@@ -23,5 +23,7 @@ for role in $roles; do
 done
 
 kubectl apply -f deploy/crds/orca-operator-orca.crd.yaml
+kubectl apply -f deploy/crds/orca-operator-orca.cr.yaml
 kubectl apply -f deploy/crds/orca-operator-policy.crd.yaml
+kubectl apply -f deploy/crds/orca-operator-policy.cr.yaml
 kubectl ${args} apply -f deploy/operator.yaml
