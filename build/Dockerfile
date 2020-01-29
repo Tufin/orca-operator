@@ -7,7 +7,7 @@ ARG redhat_pass
 RUN subscription-manager register --username ${redhat_user} --password ${redhat_pass} --auto-attach
 RUN yum -y update-minimal --security --setopt=tsflags=nodocs
 
-FROM registry.access.redhat.com/ubi7/ubi-init:latest
+FROM registry.access.redhat.com/ubi7/ubi
 
 ENV OPERATOR=/usr/local/bin/orca-operator \
     USER_UID=1001 \
