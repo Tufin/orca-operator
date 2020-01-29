@@ -5,7 +5,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: orca-operator
-  namespace: tufin-system
+  namespace: default
 roleRef:
   kind: ClusterRole
   name: orca-operator
@@ -31,7 +31,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: monitor
-  namespace: placeholder
+  namespace: tufin-system
 roleRef:
   kind: ClusterRole
   name: monitor
