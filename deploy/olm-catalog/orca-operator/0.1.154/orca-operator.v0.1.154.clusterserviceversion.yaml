@@ -340,6 +340,12 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: orca-operator
+                - name: RELATED_IMAGE_TUFIN_ORCA_OPERATOR
+                  value: registry.connect.redhat.com/tufin/orca-operator:production
+                - name: RELATED_IMAGE_TUFIN_MONITOR
+                  value: registry.connect.redhat.com/tufin/monitor:production
+                - name: RELATED_IMAGE_TUFIN_KITE
+                  value: registry.connect.redhat.com/tufin/kite:production
                 image: registry.connect.redhat.com/tufin/orca-operator
                 imagePullPolicy: Always
                 name: orca-operator
