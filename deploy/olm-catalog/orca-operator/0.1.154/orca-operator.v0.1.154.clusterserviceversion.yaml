@@ -346,7 +346,7 @@ spec:
                   value: registry.connect.redhat.com/tufin/monitor:production
                 - name: RELATED_IMAGE_TUFIN_KITE
                   value: registry.connect.redhat.com/tufin/kite:production
-                image: registry.connect.redhat.com/tufin/orca-operator
+                image: registry.connect.redhat.com/tufin/orca-operator:production
                 imagePullPolicy: Always
                 name: orca-operator
                 resources: {}
