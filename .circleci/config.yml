@@ -5,7 +5,7 @@ jobs:
     docker:
       - image: tufinim/circleci-go:master
     environment:
-      RELEASE: 1.0
+      RELEASE: "1.0"
       TAG_PREFIX: push
     steps:
       - checkout
