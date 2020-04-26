@@ -24,9 +24,6 @@ jobs:
             echo 'export PREV_VER="${PREV_DIR##*/}"' >> $BASH_ENV
             echo 'export BUNDLE_VER="${RELEASE}.${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
 
-            # shared functions
-            echo 'export CHECK_COMMIT_MSG="$([[ $(git log -1 --pretty=%B) == *"[${TAG_PREFIX}"*" ${TAG_ACTION}"*"]" ]] && echo true)"' >> $BASH_ENV
-
             source $BASH_ENV
       - run:
           name: Build operator
@@ -78,7 +75,7 @@ jobs:
           environment:
             TAG_ACTION: docker
           command: |
-            if [[ "${CHECK_COMMIT_MSG}" == "true" ]]; then
+            if [[ $(./scripts/check_commit.sh $TAG_PREFIX $TAG_ACTION)$? == 0 ]]; then
               TUFIN_PUBLISH_DOCKERHUB="true"
             fi
 
@@ -96,7 +93,7 @@ jobs:
           environment:
             TAG_ACTION: redhat
           command: |
-            if [[ "${CHECK_COMMIT_MSG}" == "true" ]]; then
+            if [[ $(./scripts/check_commit.sh $TAG_PREFIX $TAG_ACTION)$? == 0 ]]; then
               TUFIN_PUBLISH_REDHAT="true"
             fi
 
@@ -113,7 +110,7 @@ jobs:
           environment:
             TAG_ACTION: csv
           command: |
-            if [[ "${CHECK_COMMIT_MSG}" == "true" ]]; then
+            if [[ $(./scripts/check_commit.sh $TAG_PREFIX $TAG_ACTION)$? == 0 ]]; then
               TUFIN_PUSH_CSV_TO_GITHUB="true"
             fi
 
