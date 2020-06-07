@@ -124,6 +124,8 @@ jobs:
             git config --global user.name "reuvenharrison"
 
             git add "${BUNDLE_DIR}/**/*.yaml"
+            git add "${BUNDLE_DIR}/*.yaml"
+
             git commit -m "New CSV generated '${PREV_VER}' -> '${BUNDLE_VER}' [skip ci]"
             git push -q https://${GITHUB_TOKEN}@github.com/Tufin/orca-operator.git ${CIRCLE_BRANCH}
 workflows:
