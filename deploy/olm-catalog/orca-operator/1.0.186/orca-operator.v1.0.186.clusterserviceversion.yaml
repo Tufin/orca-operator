@@ -1,0 +1,386 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[{"apiVersion":"tufin.io/v1alpha1","kind":"Orca","metadata":{"name":"orca"},"spec":{"components":{"conntrack":true,"dns":false,"istio":false,"kube-network-policy":true,"pusher":true,"syslog":false,"watcher":true},"domain":"generic-bank","endpoints":{"guru":"guru.tufin.io:443","orca":"https://orca.tufin.io","registry":"registry.tufin.io"},"ignored_config_maps":["kube-system/ingress-gce-lock","istio-system/istio-ingress-controller-leader-istio"],"images":{"kite":"registry.connect.redhat.com/tufin/kite","monitor":"registry.connect.redhat.com/tufin/monitor"},"kube_platform":"Openshift","namespace":"tufin-system","project":"openshift4"},"status":{"phase":null}},{"apiVersion":"networking.tufin.io/v1","kind":"Policy","metadata":{"name":"orca","namespace":"placeholder"},"spec":{"mode":"learning","networkPolicyAllowAll":true,"rules":[]},"status":{"phase":null}}]'
+    capabilities: Basic Install
+    categories: Security
+    certified: "true"
+    containerImage: registry.connect.redhat.com/tufin/orca-operator
+    createdAt: ""
+    description: Installs the SecureCloud Agent on the cluster. SecureCloud is a cloud-based
+      security monitoring and enforcement platform for Kubernetes.
+    repository: https://github.com/Tufin/orca-operator
+    support: Tufin
+  name: orca-operator.v1.0.186
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: SecureCloud Agent configuration
+      displayName: SecureCloud
+      kind: Orca
+      name: orcas.tufin.io
+      resources:
+      - kind: Deployment
+        name: ""
+        version: apps/v1
+      - kind: ReplicaSet
+        name: ""
+        version: ""
+      specDescriptors:
+      - description: Your domain in SecureCloud - usually the name of your organization
+        displayName: domain
+        path: domain
+      - description: Your project in SecureCloud - a friendly name for your Kubernetes
+          cluster
+        displayName: project
+        path: project
+      - description: The Namespace for the SecureCloud Agent
+        displayName: SecureCloud Agent Namespace
+        path: namespace
+      - description: The docker images for the SecureCloud Agent
+        displayName: SecureCloud Agent images
+        path: images
+      - description: List of Config Maps to ignore
+        displayName: Ignored Config Maps
+        path: ignored_config_maps
+      - description: SecureCloud Agent Endpoints
+        displayName: Endpoints
+        path: endpoints
+      - description: Control over the Components of the SecureCloud Agent
+        displayName: SecureCloud Agent Components
+        path: components
+      - description: The platform the SecureCloud Agent is deployed on
+        displayName: Kubernetes Platform
+        path: kube_platform
+      statusDescriptors:
+      - description: SecureCloud CRD Status
+        displayName: Phase
+        path: phase
+      version: v1alpha1
+    - description: SecureCloud Policy configuration
+      displayName: Policy
+      kind: Policy
+      name: policies.networking.tufin.io
+      resources:
+      - kind: NetworkPolicy
+        name: ""
+        version: networking.k8s.io/v1
+      specDescriptors:
+      - description: Toggle between Enforce Mode and Learn Mode
+        displayName: Mode
+        path: mode
+      - description: Set Kubernetes Network Policy to Allow-All in Learn Mode
+        displayName: Kubernetes Network Policy
+        path: networkPolicyAllowAll
+      - description: SecureCloud Policy allowed connections
+        displayName: Rules
+        path: rules
+      statusDescriptors:
+      - description: SecureCloud Policy Status
+        displayName: Phase
+        path: phase
+      version: v1
+  description: |-
+    Tufin SecureCloud is a cloud-based security monitoring and enforcement platform for Kubernetes clusters, containers and microservices.
+    The SecureCloud Operator installs SecureCloud resources into your cluster. These work with the SecureCloud cloud application to give the following functionality:
+    * Monitor the cluster configuration: namespaces, containers, pods, services, network policies etc.
+    * Learn and visualize the cluster connectivity
+    * Build a connectivity policy (whitelist)
+    * Generate audit reports
+    * Alert on unauthorized connections
+    * Enforce the connectivity policy in the cluster and on enterpise firewalls surrounding the cluster
+    * Integrate into the CI/CD pipeline to learn and update the policy continuously
+    * Scan images for vulnerabilities
+    ## Deploying the agent
+    * Sign up to SecureCloud [here] (https://www.tufin.com/tufin-orchestration-suite/securecloud)
+    * You will be sent an email containing your deployment parameters
+    * Complete the deployment following the instructions for generating the agent's secret [here] (https://github.com/Tufin/orca-operator/blob/master/README.md)
+  displayName: Tufin SecureCloud Operator
+  icon:
+  - base64data: iVBORw0KGgoAAAANSUhEUgAAAFAAAAAoCAYAAABpYH0BAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQyIDc5LjE2MDkyNCwgMjAxNy8wNy8xMy0wMTowNjozOSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTggKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjEzQzRCQzMzODdEQzExRUE4Q0U5RkE0NjkyMjlDOUZBIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjEzQzRCQzM0ODdEQzExRUE4Q0U5RkE0NjkyMjlDOUZBIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTNDNEJDMzE4N0RDMTFFQThDRTlGQTQ2OTIyOUM5RkEiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MTNDNEJDMzI4N0RDMTFFQThDRTlGQTQ2OTIyOUM5RkEiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4CSEyrAAADn0lEQVR42uxaW0gVURS9V29e7y3Nj+yjj4KsCLPoAX1UkEVBGAiRHxV+FEGkEb2oSxRYUGTUTyCB9VFBVgZBZQX10YOiFxk9ICICLVKDoof0Fr2tjfvSNM6cfWY0nfRsWJyZe9Y5s2fNmT1nn3PDyWQyZMy/pRkJjIBGQCOgEdCYXwsH2bl3iXAxilJgCjACiHNVK1CXuzdZ2tc+Rlwcj6EoBBYCu+Do214Wjvw6CZS4ULKBWUF4yBGL06NRFDHmAJlctb8P/NqkEC9QFmHx6lFMDZBf5f/bRyQvQHEvF8VIBaUFWMlvSnBe4QDZMKG+FDH5atBGYJC+xlGh/magYiBembH8VXOznF72aZJQnw887kaIyBHu6QNGeCtzaYAV8BSKjp+hrvGveSBIL4UY2Aw8AGjZZgPQBtwS/FyFC11hJ54IMa0c3BPMzaJCGIU/AfJ5Ldpd43Y0Kicq2lSCW8ncHSgqFNydQA1QBqxwEPsGsBr9PU/FQOkDQuoX8zFd/BMwSmgTt83Zhiq4GZbjdI1XmOon2PrMEq6R6WGQVggCz6YwggcxHSI2mFTO/4dut8mFu2eLMQqjJOBxgXgbWAIsAhqAJmCPhwutA9o1uRS8awVOKsW7Z/ntkAd/qjmuh4Q4+03gUOjJIwETAnEL3vVa4CzwGaCPyDbgo4634J9DcVmT24GiSqCtB+8M0GJpdxDFQ81rULt9CsodYDAwhD8iShHT0GEzK+5mXx2cSPJo0Z49eOB+Eep/ufx+18M1GhV1L3B/7XSPwFGcv9GZSP/oBzGp7R/126QjoDGfUyAjYA/lwsaMgP1LwDYjoL88UppqDEgBZ/joN992nt6Db0Hc4+9kMdt52Ef/TjZIx/mtyPkKHH5XzR23o81yoBCgpfe5Cu542/k4wZ/5XWbpiTA9INWeTgk4cVUfFiviNVIdm5ym8crRysN9dLrGQ3ZBbY4AtF53MdS5JOZmZeh7nuX8sJTLgj/GftPANEUb2nHcyGLT+l6Zgktp3AVNAatSAj4ViDGHp3a9h8II5ZzWDfJsgR/lNrohImVe9n+imryMlIA1Pm682ilPHqjTGEqaT3lpiESbkuylwHeNxP11fxUwwmJ0IDYsw+Fpfp1of2E4czpYhDoHEevQjjaBNgMLQn/2Pl7x6gitNV4CZoY693LdzLrHckDDb3v8pQd0TGjzyBLvJe57y/F5S9suFjZ/8TWpnBHQCGgENObXfgswAKYr50StuO/hAAAAAElFTkSuQmCC
+    mediatype: image/png
+  install:
+    spec:
+      clusterPermissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - services
+          - endpoints
+          - persistentvolumeclaims
+          - events
+          - configmaps
+          - secrets
+          verbs:
+          - '*'
+        - apiGroups:
+          - ""
+          resources:
+          - namespaces
+          verbs:
+          - get
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          - daemonsets
+          - replicasets
+          - statefulsets
+          verbs:
+          - '*'
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
+          - apps
+          resourceNames:
+          - orca-operator
+          resources:
+          - deployments/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - tufin.io
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        - apiGroups:
+          - networking.tufin.io
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        serviceAccountName: orca-operator
+      - rules:
+        - apiGroups:
+          - networking.k8s.io
+          resources:
+          - networkpolicies
+          verbs:
+          - '*'
+        - apiGroups:
+          - networking.tufin.io
+          resources:
+          - policies
+          verbs:
+          - '*'
+        - apiGroups:
+          - config.istio.io
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - customresourcedefinitions
+          verbs:
+          - '*'
+        - apiGroups:
+          - istio.io
+          resources:
+          - istioconfigs
+          - istioconfigs.istio.io
+          verbs:
+          - '*'
+        - apiGroups:
+          - extensions
+          resources:
+          - thirdpartyresources
+          - thirdpartyresources.extensions
+          - ingresses
+          - ingresses/status
+          verbs:
+          - '*'
+        - apiGroups:
+          - ""
+          resources:
+          - configmaps
+          verbs:
+          - create
+          - get
+          - list
+          - watch
+          - update
+        - apiGroups:
+          - ""
+          resources:
+          - endpoints
+          - pods
+          - services
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - ""
+          resources:
+          - namespaces
+          - nodes
+          - secrets
+          - persistentvolumeclaims
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - security.openshift.io
+          resourceNames:
+          - hostaccess
+          - hostnetwork
+          - node-exporter
+          resources:
+          - securitycontextconstraints
+          verbs:
+          - use
+        serviceAccountName: kite
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          verbs:
+          - get
+          - list
+          - watch
+          - delete
+        - apiGroups:
+          - ""
+          resources:
+          - pods/log
+          - services
+          - nodes
+          - namespaces
+          - persistentvolumes
+          - persistentvolumeclaims
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - apps
+          resources:
+          - statefulsets
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - batch
+          resources:
+          - cronjobs
+          - jobs
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - extensions
+          resources:
+          - deployments
+          - daemonsets
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - extensions
+          resources:
+          - deployments/scale
+          verbs:
+          - get
+          - update
+        - apiGroups:
+          - storage.k8s.io
+          resources:
+          - storageclasses
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - security.openshift.io
+          resourceNames:
+          - privileged
+          resources:
+          - securitycontextconstraints
+          verbs:
+          - use
+        serviceAccountName: monitor
+      deployments:
+      - name: orca-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: orca-operator
+          strategy: {}
+          template:
+            metadata:
+              labels:
+                name: orca-operator
+            spec:
+              containers:
+              - command:
+                - orca-operator
+                env:
+                - name: WATCH_NAMESPACE
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: OPERATOR_NAME
+                  value: orca-operator
+                - name: RELATED_IMAGES_TUFIN_ORCA_OPERATOR
+                  value: registry.connect.redhat.com/tufin/orca-operator
+                - name: RELATED_IMAGES_TUFIN_MONITOR
+                  value: registry.connect.redhat.com/tufin/monitor
+                - name: RELATED_IMAGES_TUFIN_KITE
+                  value: registry.connect.redhat.com/tufin/kite
+                image: registry.connect.redhat.com/tufin/orca-operator:1.0.186
+                imagePullPolicy: Always
+                name: orca-operator
+                resources: {}
+              serviceAccountName: orca-operator
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: false
+    type: AllNamespaces
+  keywords:
+  - tufin
+  - orca
+  - securecloud
+  - security
+  labels:
+    operated-by: orca-operator
+  links:
+  - name: Tufin
+    url: https://www.tufin.io
+  maintainers:
+  - email: ask-cloud@tufin.com
+    name: Tufin
+  maturity: beta
+  minKubeVersion: 1.11.0
+  provider:
+    name: Tufin
+  replaces: orca-operator.v1.0.184
+  selector:
+    matchLabels:
+      operated-by: orca-operator
+  version: 1.0.186

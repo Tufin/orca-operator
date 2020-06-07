@@ -1,4 +1,4 @@
 packageName: orca
 channels:
 - name: beta
-  currentCSV: orca-operator.v1.0.184
+  currentCSV: orca-operator.v1.0.186
