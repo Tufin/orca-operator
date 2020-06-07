@@ -15,7 +15,6 @@ spec:
       serviceAccountName: orca-operator
       containers:
         - name: orca-operator
-          # Replace this with the built image name
           image: registry.connect.redhat.com/tufin/orca-operator
           command:
           - orca-operator
@@ -29,5 +28,11 @@ spec:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
               value: "orca-operator"
+            - name: RELATED_IMAGES_TUFIN_ORCA_OPERATOR
+              value: registry.connect.redhat.com/tufin/orca-operator
+            - name: RELATED_IMAGES_TUFIN_MONITOR
+              value: registry.connect.redhat.com/tufin/monitor
+            - name: RELATED_IMAGES_TUFIN_KITE
+              value: registry.connect.redhat.com/tufin/kite
 status:
   phase:
