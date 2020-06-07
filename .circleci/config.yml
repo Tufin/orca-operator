@@ -46,6 +46,7 @@ jobs:
 
             # inject version
             sed "s/#VERSION#/${BUNDLE_VER}/g" deploy/olm-catalog/orca-operator.package.tmp.yaml > ${BUNDLE_DIR}/orca-operator.package.yaml
+            ./scripts/replace_olm_image_tag.sh "deploy/olm-catalog/orca-operator/${BUNDLE_VER}/orca-operator.v${BUNDLE_VER}.clusterserviceversion.yaml" "${BUNDLE_VER}"
 
             # copy artifact files into this volume
             docker cp ${BUNDLE_DIR}/ configs:/artifacts

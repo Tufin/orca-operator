@@ -27,6 +27,10 @@ kubectl create -f deploy/crds/tufin_v1alpha1_orca_cr.yaml
 ```
 
 # Build
+building the operators with `operator-sdk` cli uses the following YAML files:
+1. `deploy/*.yaml` -> to generate the different sections in the CSV
+2. `deploy/olm-catalog/` latest CSV file -> used as a base for the new CSV file
+
 ```
 operator-sdk generate k8s # only needed after changing kite_types.go
 operator-sdk build tufin/orca-operator --image-build-args "--build-arg version=${CIRCLE_BUILD_NUM} --build-arg release=${OPENSHIFT_RELEASE}"
