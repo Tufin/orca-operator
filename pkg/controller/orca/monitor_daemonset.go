@@ -13,7 +13,7 @@ func getMonitorDaemonset(cr *appv1alpha1.Orca) *appsv1.DaemonSet {
 
 	labels := GetLabels(app + "=" + monitor)
 
-	if monitorImg := os.Getenv("RELATED_IMAGE_TUFIN_MONITOR"); monitorImg != "" {
+	if monitorImg := os.Getenv("RELATED_IMAGES_TUFIN_MONITOR"); monitorImg != "" {
 		cr.Spec.Images[monitor] = monitorImg
 	}
 

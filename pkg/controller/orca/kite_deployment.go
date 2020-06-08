@@ -16,7 +16,7 @@ func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
 	var replicas int32 = 1
 	labels := GetLabels(app + "=" + kite)
 
-	if kiteImg := os.Getenv("RELATED_IMAGE_TUFIN_KITE"); kiteImg != "" {
+	if kiteImg := os.Getenv("RELATED_IMAGES_TUFIN_KITE"); kiteImg != "" {
 		cr.Spec.Images[kite] = kiteImg
 	}
 
