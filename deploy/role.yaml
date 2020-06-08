@@ -63,8 +63,15 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: kite
-  namespace: tufin-system
 rules:
+- verbs:
+  - list
+  - watch
+  - get
+  apiGroups:
+  - '*'
+  resources:
+  - '*'
 - apiGroups:
   - networking.k8s.io
   resources:
@@ -151,7 +158,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: monitor
-  namespace: tufin-system
 rules:
 - apiGroups:
     - ''
