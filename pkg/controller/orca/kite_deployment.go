@@ -41,7 +41,12 @@ func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
 				Spec: corev1.PodSpec{
 					ServiceAccountName: kite,
 					Volumes: []corev1.Volume{
-						GetHostVolume(dockerSocketVolumeName, dockerSocketVolumePath, corev1.HostPathUnset),
+						{
+							Name: kiteTempVolumeName,
+							VolumeSource: corev1.VolumeSource{
+								EmptyDir: &corev1.EmptyDirVolumeSource{},
+							},
+						},
 					},
 					Containers: []corev1.Container{
 						{
@@ -49,7 +54,10 @@ func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
 							Image:           cr.Spec.Images[kite],
 							ImagePullPolicy: corev1.PullAlways,
 							VolumeMounts: []corev1.VolumeMount{
-								{Name: dockerSocketVolumeName, MountPath: dockerSocketVolumePath},
+								{Name: kiteTempVolumeName, MountPath: kiteTempVolumePath},
+							},
+							SecurityContext: &corev1.SecurityContext{
+								Privileged: GetBoolRef(true),
 							},
 							Ports: []corev1.ContainerPort{
 								{ContainerPort: 6060}, {ContainerPort: 6061}, {ContainerPort: 6062, Protocol: corev1.ProtocolUDP},
@@ -87,7 +95,7 @@ func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
 								},
 								{
 									Name:  "TUFIN_INSTALL_CONNTRACK",
-									Value: BoolToString(cr.Spec.Components["monitor"]),
+									Value: BoolToString(cr.Spec.Components["conntrack"]),
 								},
 								{
 									Name:  "TUFIN_INSTALL_SYSLOG",
