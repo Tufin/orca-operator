@@ -18,6 +18,9 @@ const (
 	dockerSocketVolumePath     = "/var/run/docker.sock"
 	scopeKernelDebugVolumeName = "sys-kernel-debug"
 	scopeKernelDebugVolumePath = "/sys/kernel/debug"
+
+	kiteTempVolumeName = "cache-volume"
+	kiteTempVolumePath = "/tmp/.local"
 )
 
 func GetBoolRef(val bool) *bool {
