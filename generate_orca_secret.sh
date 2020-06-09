@@ -6,7 +6,7 @@ TUFIN_AGENT_TOKEN="$3"
 TUFIN_NAMESPACE="${4:-default}"
 
 main() {
-    crt="$(echo | openssl s_client -connect "orca.tufin.io:443" 2> /dev/null | awk '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/')"
+    crt="$(echo | openssl s_client -connect "guru.tufin.io:443" 2> /dev/null | awk '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/')"
 
     if [[ "$?" != "0" ]]; then
         echo "Error fetching Orca certificates using openssl - please make sure you're connected to the internet & that 'openssl' is installed."
