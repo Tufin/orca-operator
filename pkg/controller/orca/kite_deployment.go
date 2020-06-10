@@ -120,19 +120,19 @@ func getKiteDeployment(cr *appv1alpha1.Orca) *appsv1.Deployment {
 								// secrets
 								{
 									Name:      "CRT",
-									ValueFrom: getSecretValue("orca-secrets", "guru-crt"),
+									ValueFrom: getSecretValue(kiteSecretsName, "guru-crt"),
 								},
 								{
 									Name:      "TUFIN_DOCKER_REPO_USERNAME",
-									ValueFrom: getSecretValue("orca-secrets", "docker-repo-username"),
+									ValueFrom: getSecretValue(kiteSecretsName, "docker-repo-username"),
 								},
 								{
 									Name:      "TUFIN_DOCKER_REPO_PASSWORD",
-									ValueFrom: getSecretValue("orca-secrets", "guru-api-key"),
+									ValueFrom: getSecretValue(kiteSecretsName, "guru-api-key"),
 								},
 								{
 									Name:      "API_KEY",
-									ValueFrom: getSecretValue("orca-secrets", "guru-api-key"),
+									ValueFrom: getSecretValue(kiteSecretsName, "guru-api-key"),
 								},
 							},
 						},

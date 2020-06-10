@@ -21,6 +21,8 @@ const (
 
 	kiteTempVolumeName = "cache-volume"
 	kiteTempVolumePath = "/tmp/.local"
+
+	kiteSecretsName = "tufin-kite-secrets"
 )
 
 func GetBoolRef(val bool) *bool {
