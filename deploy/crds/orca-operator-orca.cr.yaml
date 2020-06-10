@@ -13,7 +13,7 @@ spec:
     - kube-system/ingress-gce-lock
     - istio-system/istio-ingress-controller-leader-istio
   endpoints:
-    orca: "https://orca.tufin.io"
+    orca: "https://securecloud.tufin.io"
     guru: "guru.tufin.io:443"
     registry: "registry.tufin.io"
   components:
